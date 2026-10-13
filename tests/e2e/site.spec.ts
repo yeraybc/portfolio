@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const routes = ['/', '/runs', '/compare', '/deployments', '/model-card', '/cv', '/runs/madrid-data-house', '/runs/energy-volatility', '/runs/home-credit'];
+const routes = ['/', '/runs', '/compare', '/deployments', '/model-card', '/cv', '/runs/madrid-data-house', '/runs/energy-volatility', '/runs/home-credit', '/runs/portfolio'];
 
 for (const locale of ['', '/es']) {
   for (const route of routes) {
@@ -34,6 +34,36 @@ test('reduced motion shows the final curve without training', async ({ browser }
   await ctx.close();
 });
 
+test('an ablation run gets its own OLS baseline and a row in the runs table', async ({ page }) => {
+  await page.goto('/');
+  // Start before the automatic run ends: the default row must keep its published result.
+  await expect(page.locator('[data-pill]')).toContainText('Training');
+  await page.locator('[data-controls] select[name="set"]').selectOption('house');
+  await page.getByRole('button', { name: 'Train' }).click();
+  const rows = page.locator('[data-exp] tr');
+  await expect(rows).toHaveCount(2);
+  await expect(rows.first().locator('th')).toHaveText('House only');
+  await expect(rows.nth(1).locator('.delta')).toHaveText(/^−/);
+  await expect(rows.first().locator('.delta')).not.toHaveText('…', { timeout: 15_000 });
+  // House-only OLS is worse than the all-features baseline.
+  const olsText = (await rows.first().locator('td').nth(2).textContent())!;
+  expect(Number(olsText.replace(/\D/g, ''))).toBeGreaterThan(916);
+  await expect(page.locator('.curve-prev')).toHaveCount(1);
+});
+
+test('the AI lens swaps the home figures and intro without JS-only flashes', async ({ page }) => {
+  await page.goto('/?lens=ai');
+  await expect(page.locator('dl.summary:visible')).toHaveCount(1);
+  await expect(page.locator('dl.summary:visible')).toContainText('5 min');
+  await expect(page.locator('.lede')).toContainText('Claude Agent SDK');
+  await expect(page.locator('dl.summary[data-lens-only="ds"]')).toBeHidden();
+});
+
+test('the lens also applies in Spanish', async ({ page }) => {
+  await page.goto('/es?lens=quant');
+  await expect(page.locator('dl.summary:visible')).toContainText('VaR −160 pb');
+});
+
 test('the quant lens puts the volatility paper first and survives navigation', async ({ page }) => {
   await page.goto('/runs?lens=quant');
   await expect(page.locator('#runs-table tbody tr').first()).toHaveAttribute('data-run', 'energy-volatility');
@@ -45,11 +75,11 @@ test('the quant lens puts the volatility paper first and survives navigation', a
 test('run filters narrow the table and can be cleared', async ({ page }) => {
   await page.goto('/runs');
   await page.locator('label', { hasText: 'production' }).click();
-  await expect(page.locator('#runs-table tbody tr:visible')).toHaveCount(1);
+  await expect(page.locator('#runs-table tbody tr:visible')).toHaveCount(2);
   await page.locator('select[name="tool"]').selectOption('PyTorch');
   await expect(page.locator('[data-empty]')).toBeVisible();
   await page.locator('[data-clear]').click();
-  await expect(page.locator('#runs-table tbody tr:visible')).toHaveCount(7);
+  await expect(page.locator('#runs-table tbody tr:visible')).toHaveCount(8);
 });
 
 test('compare reads the URL and shows deltas', async ({ page }) => {

@@ -160,6 +160,15 @@ pre,
   white-space: nowrap;
 }
 
+/* Content written for one focus lens. Without a lens (no JS) the default "ds" block shows. */
+:root:not([data-lens]) [data-lens-only]:not([data-lens-only='ds']),
+:root[data-lens='ds'] [data-lens-only]:not([data-lens-only='ds']),
+:root[data-lens='quant'] [data-lens-only]:not([data-lens-only='quant']),
+:root[data-lens='ai'] [data-lens-only]:not([data-lens-only='ai']),
+:root[data-lens='de'] [data-lens-only]:not([data-lens-only='de']) {
+  display: none;
+}
+
 .skip-link {
   position: absolute;
   left: var(--s4);

@@ -1,0 +1,58 @@
+title: { en: This portfolio, es: Este portfolio }
+status: production
+lenses: [de, ai, ds]
+lens_rank: { ds: 9, quant: 9, ai: 6, de: 4 }
+year: "2026"
+featured: false
+stack: [TypeScript, Astro, zod, Web Workers, Vitest, Playwright, GitHub Actions, Vercel]
+summary:
+  en: The site you are on, built like the rest of the runs. Typed content, a neural network with no libraries, and tests on every pull request.
+  es: El sitio en el que estás, hecho como el resto de runs. Contenido tipado, una red neuronal sin librerías y tests en cada pull request.
+problem:
+  en: Show projects so that a recruiter gets the point in ten seconds and an engineer can check every figure, without a slow page that contradicts the message.
+  es: Enseñar proyectos de forma que un recruiter capte la idea en diez segundos y un ingeniero pueda comprobar cada cifra, sin una página lenta que contradiga el mensaje.
+finding:
+  en: "In the live-run ablation, dropping the neighbour price hurts the OLS baseline far more than the network: the network learns the geography from the coordinates, while the linear model needs the engineered feature."
+  es: "En la ablación del live run, quitar el precio del entorno perjudica mucho más al baseline OLS que a la red: la red aprende la geografía a partir de las coordenadas, mientras que el modelo lineal necesita la variable construida."
+headline_text: { en: "Lighthouse 95+ on mobile", es: "Lighthouse 95+ en móvil" }
+engineering:
+  - { label: { en: "Lighthouse mobile performance, home (median of 10 runs)", es: "Lighthouse móvil, rendimiento de la portada (mediana de 10 pasadas)" }, value: "96" }
+  - { label: { en: "Lighthouse accessibility, best practices, SEO", es: "Lighthouse accesibilidad, buenas prácticas, SEO" }, value: "100 / 100 / 100" }
+  - { label: { en: Live-run JavaScript (page + worker), es: JavaScript del live run (página + worker) }, value: "11.8 KB (5.2 KB gzip)" }
+  - { label: { en: Automated tests, es: Tests automáticos }, value: "19 unit + 32 end-to-end" }
+  - { label: { en: Languages, es: Idiomas }, value: "EN / ES, same content source" }
+config:
+  framework: Astro (static output) with two React islands
+  content: typed YAML collections validated with zod, one source for every page, /compare and /cv
+  live_run:
+    model: one-hidden-layer MLP (tanh, Adam), about 150 lines of TypeScript
+    runtime: Web Worker, no ML libraries
+    data: 2,000 Madrid homes (1,600 train / 400 validation) from MadridDataHouse
+    baseline: OLS on the same features, refitted for every ablation
+    ablations: [all features, without neighbour price, location only, house only]
+  charts: hand-written SVG, one visual system
+  quality: [Vitest, Playwright on desktop and 360 px, prefers-reduced-motion, no layout shift]
+  ci: GitHub Actions on every push and pull request
+  hosting: Vercel
+decisions:
+  - title: { en: Content as typed data, es: El contenido como datos tipados }
+    body:
+      en: Every run is a YAML file checked by a zod schema. The pages, the compare view and the one-page CV read the same files, so a figure cannot drift between them.
+      es: Cada run es un YAML validado con un esquema zod. Las páginas, la comparación y el CV de una página leen los mismos archivos, así que una cifra no puede variar de un sitio a otro.
+  - title: { en: A small network with no libraries, es: Una red pequeña sin librerías }
+    body:
+      en: TensorFlow.js would weigh hundreds of kilobytes for a 16-unit network. A hand-written MLP in a Web Worker keeps the page responsive, and a unit test checks that the browser reproduces the published curve exactly.
+      es: TensorFlow.js pesaría cientos de kilobytes para una red de 16 neuronas. Un MLP escrito a mano en un Web Worker mantiene la página fluida, y un test unitario comprueba que el navegador reproduce exactamente la curva publicada.
+  - title: { en: A fair baseline for every ablation, es: Un baseline justo en cada ablación }
+    body:
+      en: When the visitor removes features, the OLS is refitted on the same subset. Comparing a reduced network with the full OLS would make the network look worse than it is.
+      es: Cuando el visitante quita variables, el OLS se reajusta sobre el mismo subconjunto. Comparar una red reducida con el OLS completo haría que la red pareciera peor de lo que es.
+  - title: { en: "The figures change with the focus, the headline does not", es: "Las cifras cambian con el enfoque, el titular no" }
+    body:
+      en: "?lens=ai, quant or de reorders runs and swaps the home figures with CSS only. The headline stays Data Scientist."
+      es: "?lens=ai, quant o de reordena los runs y cambia las cifras de la portada solo con CSS. El titular sigue siendo Data Scientist."
+notes:
+  - en: "An assistant that answers questions about these runs, with citations and its own evaluation set, is planned. It waits for a server-side API key with a spending cap."
+    es: "Hay previsto un asistente que responda preguntas sobre estos runs, con citas y su propio conjunto de evaluación. Espera a tener una API key en el servidor con tope de gasto."
+artifacts:
+  repo: https://github.com/yeraybc/portfolio

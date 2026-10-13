@@ -5,7 +5,7 @@ import LiveRun from '../components/LiveRun.astro';
 import RunsTable from '../components/RunsTable.astro';
 import type { Locale } from '../i18n/ui';
 import { useT, tr, localePath } from '../i18n/utils';
-import { contact, kpis } from '../data/profile';
+import { contact, kpis, lensFocus, lenses } from '../data/profile';
 
 interface Props {
   locale: Locale;
@@ -23,7 +23,10 @@ const since = new Intl.DateTimeFormat(locale === 'es' ? 'es-ES' : 'en-GB', { day
       <span class="who">Yeray Benito</span>
       <span class="what">{t('role')} <span class="where">{locale === 'es' ? 'en Madrid' : 'in Madrid'}</span></span>
     </h1>
-    <p class="lede">{t('home.intro')}</p>
+    <p class="lede">
+      {t('home.intro')}
+      {lenses.map((l) => <span data-lens-only={l}> {tr(lensFocus[l], locale)}</span>)}
+    </p>
     <p class="avail">{t('home.available')}</p>
     <div class="ctas">
       <a class="btn btn-primary" href={`mailto:${contact.email}`}>{t('cta.email')}</a>
@@ -39,20 +42,22 @@ const since = new Intl.DateTimeFormat(locale === 'es' ? 'es-ES' : 'en-GB', { day
 
   <section class="section" aria-labelledby="summary-title">
     <h2 id="summary-title" class="visually-hidden">{t('home.summary')}</h2>
-    <dl class="summary panel">
-      {
-        kpis.map((k) => (
-          <div>
-            <dt>
-              <a href={localePath(`/runs/${k.run}`, locale)} data-internal>
-                {tr(k.label, locale)}
-              </a>
-            </dt>
-            <dd class="num">{tr(k.value, locale)}</dd>
-          </div>
-        ))
-      }
-    </dl>
+    {
+      lenses.map((l) => (
+        <dl class="summary panel" data-lens-only={l}>
+          {kpis[l].map((k) => (
+            <div>
+              <dt>
+                <a href={localePath(k.href, locale)} data-internal>
+                  {tr(k.label, locale)}
+                </a>
+              </dt>
+              <dd class="num">{tr(k.value, locale)}</dd>
+            </div>
+          ))}
+        </dl>
+      ))
+    }
   </section>
 
   <section class="section" aria-labelledby="featured-title">
