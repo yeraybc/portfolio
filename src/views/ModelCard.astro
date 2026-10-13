@@ -1,0 +1,100 @@
+---
+import { getEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import ConfigBlock from '../components/ConfigBlock.astro';
+import type { Locale } from '../i18n/ui';
+import { useT, tr } from '../i18n/utils';
+import { certs, modelCard } from '../data/profile';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useT(locale);
+const marathon = (await getEntry('runs', 'madrid-marathon-2027'))!;
+// A cert ranks high under a lens when it is relevant to it; otherwise it keeps its place after them.
+const rank = (i: number, lenses: string[], lens: string) => (lenses.includes(lens) ? i : 100 + i);
+---
+
+<Base locale={locale} path="/model-card" title={t('mc.title')} description={t('mc.lede')}>
+  <header class="page-head">
+    <h1>{t('mc.title')}</h1>
+    <p>{t('mc.lede')}</p>
+  </header>
+
+  <ConfigBlock data={modelCard[locale]} label="model_card.yaml" />
+
+  <section class="section" aria-labelledby="certs-title">
+    <h2 id="certs-title">{t('mc.certs')}</h2>
+    <ul class="certs" data-lens-sort>
+      {
+        certs.map((c, i) => (
+          <li
+            data-rank-ds={rank(i, c.lenses, 'ds')}
+            data-rank-quant={rank(i, c.lenses, 'quant')}
+            data-rank-ai={rank(i, c.lenses, 'ai')}
+            data-rank-de={rank(i, c.lenses, 'de')}
+          >
+            <div class="cert-head">
+              <span class="cert-name">{c.name}</span>
+              <span class="num muted">{tr(c.date, locale)}</span>
+            </div>
+            <span class="issuer">{c.issuer}</span>
+            {c.note && <p class="cert-note">{tr(c.note, locale)}</p>}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="marathon-title">
+    <h2 id="marathon-title">{t('mc.marathon')}</h2>
+    <p class="muted run-lede">{tr(marathon.data.summary, locale)}</p>
+    <ConfigBlock data={marathon.data.config} label="madrid-marathon-2027.yaml" />
+  </section>
+</Base>
+
+<style>
+  .certs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--s3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .certs li {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+    padding: var(--s4);
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+  }
+  .cert-head {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--s3);
+  }
+  .cert-name {
+    font-weight: 600;
+    font-size: var(--fs-sm);
+  }
+  .cert-head .num {
+    font-size: var(--fs-xs);
+    white-space: nowrap;
+  }
+  .issuer {
+    font-size: var(--fs-xs);
+    color: var(--text-2);
+  }
+  .cert-note {
+    margin-top: var(--s1);
+    font-size: var(--fs-xs);
+    color: var(--text-2);
+  }
+  .run-lede {
+    margin-bottom: var(--s3);
+  }
+</style>

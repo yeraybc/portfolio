@@ -1,0 +1,21 @@
+---
+import type { Locale } from '../i18n/ui';
+import { deltaPct, direction, showPct, type MetricLike } from '../lib/metrics';
+import { fmtPct } from '../lib/format';
+
+interface Props {
+  metric: MetricLike;
+  locale: Locale;
+}
+const { metric, locale } = Astro.props;
+const dir = direction(metric);
+const pct = deltaPct(metric);
+const arrow = metric.value < metric.baseline ? '▼' : metric.value > metric.baseline ? '▲' : '■';
+const label = dir === 'better' ? (locale === 'es' ? 'mejora' : 'better') : dir === 'worse' ? (locale === 'es' ? 'empeora' : 'worse') : '';
+---
+
+<span class={`delta ${dir}`}>
+  <span aria-hidden="true">{arrow}</span>
+  {showPct(metric) && pct !== null ? fmtPct(pct, locale, Number.isInteger(metric.reported_pct) ? 0 : 1) : null}
+  <span class="visually-hidden">{label}</span>
+</span>

@@ -1,0 +1,221 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Compare, { type CompareRun } from '../islands/Compare.tsx';
+import type { Locale } from '../i18n/ui';
+import { useT, tr, localePath } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useT(locale);
+const all = (await getCollection('runs')).filter((r) => !r.data.hidden).sort((a, b) => (a.data.lens_rank.ds ?? 99) - (b.data.lens_rank.ds ?? 99));
+const runs: CompareRun[] = all.map((r) => ({
+  id: r.id,
+  title: tr(r.data.title, locale),
+  href: localePath(`/runs/${r.id}`, locale),
+  status: r.data.status,
+  statusLabel: t(`status.${r.data.status}`),
+  summary: tr(r.data.summary, locale),
+  year: r.data.year,
+  baselineLabel: r.data.baseline_label ? tr(r.data.baseline_label, locale) : undefined,
+  sealed: r.data.sealed ? tr(r.data.sealed.reason, locale) : undefined,
+  headline: r.data.headline_text ? tr(r.data.headline_text, locale) : undefined,
+  metrics: r.data.metrics.map((m) => ({ ...m, name: tr(m.name, locale) })),
+  engineering: r.data.engineering.map((e) => ({ label: tr(e.label, locale), value: e.value })),
+  stack: r.data.stack,
+  config: r.data.config,
+}));
+const es = locale === 'es';
+const strings = {
+  a: t('compare.a'),
+  b: t('compare.b'),
+  metric: t('compare.metric'),
+  noMetric: t('compare.noMetric'),
+  share: t('compare.share'),
+  copied: t('compare.copied'),
+  config: t('run.tab.config'),
+  metrics: t('run.tab.metrics'),
+  stack: t('runs.col.stack'),
+  sealed: t('run.sealed'),
+  open: t('run.back'),
+  shared: es ? 'Herramientas en común' : 'Shared tools',
+};
+---
+
+<Base locale={locale} path="/compare" title={t('compare.title')} description={t('compare.lede')}>
+  <header class="page-head">
+    <h1>{t('compare.title')}</h1>
+    <p>{t('compare.lede')}</p>
+  </header>
+  <Compare client:load locale={locale} runs={runs} strings={strings} />
+</Base>
+
+<style is:global>
+  .cmp-pickers {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: var(--s3);
+    margin-bottom: var(--s4);
+  }
+  .cmp-pickers label {
+    display: grid;
+    gap: var(--s1);
+    font-size: var(--fs-xs);
+    color: var(--muted);
+    flex: 1 1 240px;
+  }
+  .cmp-pickers select {
+    min-height: 36px;
+    padding: 0 var(--s2);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--panel);
+    color: var(--text);
+    font: inherit;
+    font-size: var(--fs-sm);
+  }
+  .cmp-shared {
+    margin-bottom: var(--s4);
+  }
+  .small {
+    font-size: var(--fs-sm);
+  }
+  .cmp-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s4);
+  }
+  .cmp-col {
+    display: grid;
+    align-content: start;
+    gap: var(--s3);
+    padding: var(--s5);
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    min-width: 0;
+  }
+  .cmp-head {
+    display: flex;
+    gap: var(--s3);
+    font-size: var(--fs-xs);
+  }
+  .cmp-status {
+    font-family: var(--font-mono);
+    color: var(--text-2);
+  }
+  .st-production span {
+    color: var(--good);
+  }
+  .st-running span {
+    color: var(--live);
+  }
+  .cmp-col h2 {
+    font-family: var(--font-cond);
+    font-size: var(--fs-xl);
+  }
+  .cmp-col h2 a {
+    text-decoration: none;
+  }
+  .cmp-col h2 a:hover {
+    text-decoration: underline;
+  }
+  .cmp-sum {
+    color: var(--text-2);
+    font-size: var(--fs-sm);
+  }
+  .cmp-col h3 {
+    margin-top: var(--s3);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .cmp-sealed {
+    color: var(--live);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+  }
+  .cmp-metrics {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-sm);
+  }
+  .cmp-metrics th,
+  .cmp-metrics td {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--rule);
+    text-align: left;
+    font-weight: 400;
+  }
+  .cmp-metrics thead th {
+    font-size: var(--fs-xs);
+    color: var(--muted);
+  }
+  .cmp-metrics .r {
+    text-align: right;
+    padding-left: var(--s3);
+    white-space: nowrap;
+  }
+  .cmp-metrics .delta.better {
+    color: var(--good);
+  }
+  .cmp-metrics .delta.worse {
+    color: var(--bad);
+  }
+  .cmp-eng {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--s3);
+    margin: 0;
+  }
+  .cmp-eng dt {
+    font-size: var(--fs-xs);
+    color: var(--text-2);
+  }
+  .cmp-eng dd {
+    margin: 0;
+    font-size: var(--fs-sm);
+  }
+  .cmp-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+  }
+  .cmp-config {
+    margin: 0;
+    padding: var(--s3) var(--s4);
+    overflow-x: auto;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    font-size: var(--fs-xs);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .cmp-config .tk-key {
+    color: var(--text);
+    font-weight: 500;
+  }
+  .cmp-config .tk-str {
+    color: var(--text-2);
+  }
+  .cmp-config .tk-num,
+  .cmp-config .tk-bool {
+    color: var(--live);
+  }
+  .cmp-config .tk-punct,
+  .cmp-config .tk-comment {
+    color: var(--muted);
+  }
+  @media (max-width: 760px) {
+    .cmp-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

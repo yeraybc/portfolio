@@ -1,0 +1,12 @@
+---
+import { getCollection } from 'astro:content';
+import Run from '../../../views/Run.astro';
+
+export async function getStaticPaths() {
+  const runs = await getCollection('runs');
+  return runs.map((run) => ({ params: { slug: run.id }, props: { run } }));
+}
+const { run } = Astro.props;
+---
+
+<Run locale="es" run={run} />

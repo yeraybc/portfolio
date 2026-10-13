@@ -1,0 +1,154 @@
+---
+// Baseline vs final for one metric: two thin bars on a shared zero-anchored scale.
+// HTML/CSS so labels stay at reading size whatever the card width.
+import type { Locale, L } from '../../i18n/ui';
+import { tr, useT } from '../../i18n/utils';
+import { direction } from '../../lib/metrics';
+import { fmtNum, fmtBaseline, withUnit } from '../../lib/format';
+import Delta from '../Delta.astro';
+
+interface Props {
+  locale: Locale;
+  metric: {
+    name: L;
+    unit?: string;
+    baseline: number;
+    value: number;
+    lower_is_better?: boolean;
+    target?: number;
+    significance?: string;
+    decimals?: number;
+    reported_pct?: number;
+    approx_baseline?: boolean;
+  };
+  baselineLabel?: string;
+}
+const { locale, metric: m, baselineLabel } = Astro.props;
+const t = useT(locale);
+const dir = direction(m);
+
+const lo = Math.min(0, m.baseline, m.value, m.target ?? 0);
+const hi = Math.max(0, m.baseline, m.value, m.target ?? 0);
+const pos = (v: number) => ((v - lo) / (hi - lo || 1)) * 100;
+const zero = pos(0);
+const geom = (v: number) => ({ left: Math.min(pos(v), zero), width: Math.max(Math.abs(pos(v) - zero), 0.6), neg: v < 0 });
+const rows = [
+  { label: baselineLabel ?? t('run.baseline'), text: withUnit(fmtBaseline(m, locale), m.unit), g: geom(m.baseline), cls: 'base' },
+  {
+    label: t('run.final'),
+    text: withUnit(fmtNum(m.value, locale, m.decimals), m.unit),
+    g: geom(m.value),
+    cls: dir === 'worse' ? 'bad' : dir === 'better' ? 'good' : 'base',
+  },
+];
+---
+
+<figure class="mbars">
+  <figcaption>
+    <span class="mname">{tr(m.name, locale)}</span>
+    <Delta metric={m} locale={locale} />
+  </figcaption>
+  <div class="rows">
+    {
+      rows.map((r) => (
+        <div class="row" title={`${r.label}: ${r.text}`}>
+          <span class="lbl">{r.label}</span>
+          <span class="track">
+            {lo < 0 && <span class="zero" style={`left:${zero}%`} />}
+            {m.target !== undefined && m.target !== 0 && <span class="zero" style={`left:${pos(m.target)}%`} />}
+            <span class={`bar ${r.cls} ${r.g.neg ? 'neg' : ''}`} style={`left:${r.g.left}%;width:${r.g.width}%`} />
+          </span>
+          <span class="val num">{r.text}</span>
+        </div>
+      ))
+    }
+  </div>
+  {
+    (m.significance || m.target !== undefined) && (
+      <p class="sig">
+        {m.target !== undefined && (
+          <span>
+            {t('run.target')}: {fmtNum(m.target, locale)}.{' '}
+          </span>
+        )}
+        {m.significance}
+      </p>
+    )
+  }
+</figure>
+
+<style>
+  .mbars {
+    margin: 0;
+    padding: var(--s4) var(--s5);
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+  }
+  figcaption {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--s3);
+    margin-bottom: var(--s3);
+    font-size: var(--fs-sm);
+  }
+  .mname {
+    font-weight: 500;
+  }
+  .rows {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--s2) var(--s3);
+    font-size: var(--fs-xs);
+  }
+  .row {
+    display: contents;
+  }
+  .lbl {
+    color: var(--text-2);
+    white-space: nowrap;
+  }
+  .track {
+    position: relative;
+    height: 12px;
+  }
+  .bar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .bar.neg {
+    border-radius: 4px 0 0 4px;
+  }
+  .zero {
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    width: 1px;
+    background: var(--muted);
+  }
+  .base {
+    background: var(--base);
+  }
+  .good {
+    background: var(--good);
+  }
+  .bad {
+    background: var(--bad);
+  }
+  .val {
+    min-width: 9ch;
+    text-align: right;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .sig {
+    margin-top: var(--s3);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--muted);
+  }
+</style>

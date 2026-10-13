@@ -1,0 +1,58 @@
+title: { en: Data ingestion agent, es: Agente de homogeneización de datos }
+status: pilot
+lenses: [ai, de]
+lens_rank: { ds: 5, quant: 6, ai: 1, de: 2 }
+year: "2026"
+featured: true
+stack: [Python, Claude Agent SDK, Claude Code]
+summary:
+  en: An agent that standardises client spreadsheets with heterogeneous formats, built in my first week at Velle Capital. In pilot.
+  es: Un agente que homogeneiza excels de clientes con formatos heterogéneos, construido en mi primera semana en Velle Capital. En piloto.
+problem:
+  en: Client data arrives as spreadsheets with different layouts and column names. Standardising them was manual work before it could enter the data pipelines.
+  es: Los datos de clientes llegan en excels con estructuras y nombres de columna distintos. Homogeneizarlos era trabajo manual antes de que pudieran entrar en los pipelines de datos.
+finding:
+  en: Talking to the team that did the work by hand first defined which cases the agent should decide and which it should escalate to a person.
+  es: Hablar antes con el equipo que lo hacía a mano definió qué casos debía resolver el agente y cuáles debía elevar a una persona.
+baseline_label: { en: Manual process, es: Proceso manual }
+headline_metric:
+  name: { en: Time for 40 spreadsheets, es: Tiempo para 40 excels }
+  unit: min
+  baseline: 60
+  value: 5
+  lower_is_better: true
+  approx_baseline: true
+metrics:
+  - name: { en: Time for 40 spreadsheets, es: Tiempo para 40 excels }
+    unit: min
+    baseline: 60
+    value: 5
+    lower_is_better: true
+engineering:
+  - { label: { en: Field-level accuracy, es: Acierto por campo }, value: "98%" }
+  - { label: { en: Errors on 40 files, es: Fallos en 40 archivos }, value: "2" }
+  - { label: { en: Sent to human review, es: Elevados a revisión humana }, value: "5" }
+config:
+  input: 40 client spreadsheets, heterogeneous layouts
+  stages: [Claude Code skill, autonomous agent]
+  agent: Python, Claude Agent SDK
+  evaluation: accuracy per standardised field, not per file
+  human_in_the_loop: ambiguous fields are escalated for review
+  status: pilot, not yet the official production process
+decisions:
+  - title: { en: Map the manual process first, es: Mapear primero el proceso manual }
+    body:
+      en: I described the hand-made ingestion step by step and talked with the team that ran it before automating anything.
+      es: Describí paso a paso la ingesta manual y hablé con el equipo que la hacía antes de automatizar nada.
+  - title: { en: "Skill first, agent second", es: "Primero la skill, después el agente" }
+    body:
+      en: A Claude Code skill proved the approach (about 1 hour down to 5 minutes). Only then did it become an agent that runs the task on its own.
+      es: Una skill de Claude Code validó el enfoque (de cerca de 1 hora a 5 minutos). Solo después pasó a ser un agente que ejecuta la tarea por sí solo.
+  - title: { en: Escalate instead of guessing, es: Elevar en vez de adivinar }
+    body:
+      en: Ambiguous fields go to human review rather than being silently filled in. 98% is measured per field.
+      es: Los campos ambiguos pasan a revisión humana en vez de rellenarse en silencio. El 98 % se mide por campo.
+notes:
+  - en: Described generically on purpose. No client data, names or screenshots are published.
+    es: Descrito de forma genérica a propósito. No se publican datos, nombres de clientes ni capturas.
+artifacts: {}

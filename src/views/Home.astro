@@ -1,0 +1,242 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import LiveRun from '../components/LiveRun.astro';
+import RunsTable from '../components/RunsTable.astro';
+import type { Locale } from '../i18n/ui';
+import { useT, tr, localePath } from '../i18n/utils';
+import { contact, kpis } from '../data/profile';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useT(locale);
+const runs = (await getCollection('runs')).filter((r) => r.data.featured).sort((a, b) => (a.data.lens_rank.ds ?? 99) - (b.data.lens_rank.ds ?? 99));
+const velle = (await getEntry('deployments', 'velle-capital'))!;
+const since = new Intl.DateTimeFormat(locale === 'es' ? 'es-ES' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(velle.data.start));
+---
+
+<Base locale={locale} path="/">
+  <section class="intro">
+    <h1>
+      <span class="who">Yeray Benito</span>
+      <span class="what">{t('role')} <span class="where">{locale === 'es' ? 'en Madrid' : 'in Madrid'}</span></span>
+    </h1>
+    <p class="lede">{t('home.intro')}</p>
+    <p class="avail">{t('home.available')}</p>
+    <div class="ctas">
+      <a class="btn btn-primary" href={`mailto:${contact.email}`}>{t('cta.email')}</a>
+      <a class="btn" href={localePath('/cv', locale)} data-internal>{t('cta.cv')}</a>
+      <a class="btn btn-ghost" href={contact.linkedin} rel="me">LinkedIn</a>
+      <a class="btn btn-ghost" href={contact.github} rel="me">GitHub</a>
+    </div>
+  </section>
+
+  <div class="hero">
+    <LiveRun locale={locale} />
+  </div>
+
+  <section class="section" aria-labelledby="summary-title">
+    <h2 id="summary-title" class="visually-hidden">{t('home.summary')}</h2>
+    <dl class="summary panel">
+      {
+        kpis.map((k) => (
+          <div>
+            <dt>
+              <a href={localePath(`/runs/${k.run}`, locale)} data-internal>
+                {tr(k.label, locale)}
+              </a>
+            </dt>
+            <dd class="num">{tr(k.value, locale)}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <section class="section" aria-labelledby="featured-title">
+    <div class="sec-head">
+      <h2 id="featured-title">{t('home.recent')}</h2>
+      <a href={localePath('/runs', locale)} data-internal>{t('cta.allRuns')}</a>
+    </div>
+    <RunsTable runs={runs} locale={locale} />
+  </section>
+
+  <section class="section two" aria-labelledby="dep-title">
+    <div class="dep panel">
+      <h2 id="dep-title">{t('home.current')}</h2>
+      <p class="dep-line">
+        <span class="org">{velle.data.org}</span>
+        <span class="role">{tr(velle.data.role, locale)}</span>
+      </p>
+      <p class="status-line num"><span class="live-dot" aria-hidden="true">●</span> {t('status.running')} {t('dep.since')} {since}</p>
+      <ul>
+        {velle.data.highlights.slice(0, 2).map((h) => <li>{tr(h, locale)}</li>)}
+      </ul>
+      <a href={localePath('/deployments', locale)} data-internal>{t('nav.deployments')}</a>
+    </div>
+    <div class="contact panel">
+      <h2>{t('home.contact')}</h2>
+      <p>{t('home.available')}</p>
+      <p><a class="mail" href={`mailto:${contact.email}`}>{contact.email}</a></p>
+      <div class="ctas">
+        <a class="btn btn-primary" href={`mailto:${contact.email}`}>{t('cta.email')}</a>
+        <a class="btn" href={localePath('/cv', locale)} data-internal>{t('cta.cv')}</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .intro {
+    display: grid;
+    gap: var(--s4);
+    margin-bottom: var(--s6);
+  }
+  h1 {
+    display: grid;
+    gap: var(--s1);
+  }
+  .who {
+    font-family: var(--font-cond);
+    font-size: clamp(2.441rem, 6vw, 3.815rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .what {
+    font-size: var(--fs-xl);
+    font-weight: 400;
+    color: var(--text-2);
+  }
+  .lede {
+    font-size: var(--fs-lg);
+    line-height: 1.5;
+  }
+  .avail {
+    color: var(--text-2);
+  }
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s2);
+    margin-top: var(--s2);
+  }
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin: 0;
+  }
+  .summary div {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: var(--s1);
+    padding: var(--s4) var(--s5);
+    border-left: 1px solid var(--rule);
+  }
+  .summary div:first-child {
+    border-left: 0;
+  }
+  .summary dd {
+    margin: 0;
+    font-size: var(--fs-lg);
+    font-weight: 500;
+  }
+  .summary dt a {
+    font-size: var(--fs-xs);
+    color: var(--text-2);
+  }
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s4);
+    margin-bottom: var(--s4);
+    font-size: var(--fs-sm);
+  }
+  .two {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: var(--s4);
+  }
+  .dep,
+  .contact {
+    display: grid;
+    align-content: start;
+    gap: var(--s3);
+    padding: var(--s5);
+  }
+  .dep h2,
+  .contact h2 {
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .dep-line {
+    display: grid;
+  }
+  .org {
+    font-family: var(--font-cond);
+    font-weight: 600;
+    font-size: var(--fs-xl);
+  }
+  .role {
+    color: var(--text-2);
+  }
+  .status-line {
+    font-size: var(--fs-xs);
+    color: var(--text-2);
+  }
+  .live-dot {
+    color: var(--live);
+  }
+  .dep ul {
+    margin: 0;
+    padding-left: 1.1em;
+    display: grid;
+    gap: var(--s2);
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+  }
+  .dep > a {
+    font-size: var(--fs-sm);
+  }
+  .mail {
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+  }
+  @media (max-width: 1100px) {
+    .summary {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .summary div:nth-child(4) {
+      border-left: 0;
+    }
+    .summary div:nth-child(n + 4) {
+      border-top: 1px solid var(--rule);
+    }
+  }
+  @media (max-width: 720px) {
+    .summary {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .summary div {
+      border-left: 0;
+      border-top: 1px solid var(--rule);
+    }
+    .summary div:nth-child(-n + 2) {
+      border-top: 0;
+    }
+    .summary div:nth-child(even) {
+      border-left: 1px solid var(--rule);
+    }
+    .summary div:last-child {
+      grid-column: 1 / -1;
+      border-left: 0;
+    }
+    .two {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,178 @@
+---
+// Model leaderboard: one bar per model, lower is better, baseline in neutral gray.
+import type { Locale, L } from '../../i18n/ui';
+import { tr } from '../../i18n/utils';
+import { fmtNum, fmtPct } from '../../lib/format';
+
+interface Props {
+  locale: Locale;
+  board: {
+    title: L;
+    metric: string;
+    baseline: string;
+    rows: { model: string; value: number; delta_pct?: number; sig: string; in_mcs?: boolean }[];
+    note: L;
+  };
+}
+const { locale, board } = Astro.props;
+const rows = [...board.rows].sort((a, b) => a.value - b.value);
+const max = Math.max(...rows.map((r) => r.value));
+const base = rows.find((r) => r.model === board.baseline)!;
+const cls = (r: (typeof rows)[number]) =>
+  r.model === board.baseline || r.sig === 'ns' ? 'base' : (r.delta_pct ?? 0) < 0 ? 'good' : 'bad';
+const es = locale === 'es';
+---
+
+<figure class="lb panel">
+  <figcaption>{tr(board.title, locale)}</figcaption>
+  <table>
+    <thead class="visually-hidden">
+      <tr>
+        <th scope="col">{es ? 'Modelo' : 'Model'}</th>
+        <th scope="col">{board.metric}</th>
+        <th scope="col">{es ? 'Frente a GARCH' : 'vs GARCH'}</th>
+        <th scope="col">{es ? 'Significancia' : 'Significance'}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        rows.map((r) => (
+          <tr class={r.in_mcs ? 'mcs' : ''}>
+            <th scope="row">{r.model}</th>
+            <td class="bar-cell">
+              <span class="track">
+                <span class="ref" style={`left:${(base.value / max) * 100}%`} />
+                <span class={`bar ${cls(r)}`} style={`width:${(r.value / max) * 100}%`} />
+              </span>
+              <span class="num v">{fmtNum(r.value, locale, 4)}</span>
+            </td>
+            <td class="num d">{r.delta_pct !== undefined ? fmtPct(r.delta_pct, locale) : es ? 'baseline' : 'baseline'}</td>
+            <td class="num s">{r.model === board.baseline ? '' : r.sig}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+  <p class="legend">
+    <span><i class="sw good"></i>{es ? 'mejor que GARCH, significativo' : 'better than GARCH, significant'}</span>
+    <span><i class="sw base"></i>{es ? 'baseline o no significativo' : 'baseline or not significant'}</span>
+    <span><i class="sw bad"></i>{es ? 'peor, significativo' : 'worse, significant'}</span>
+    <span>{es ? 'En negrita: dentro del Model Confidence Set' : 'Bold: inside the Model Confidence Set'}</span>
+  </p>
+  <p class="note">{tr(board.note, locale)}</p>
+</figure>
+
+<style>
+  .lb {
+    margin: 0;
+    padding: var(--s4) var(--s5);
+  }
+  figcaption {
+    margin-bottom: var(--s3);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-sm);
+  }
+  th,
+  td {
+    padding: 6px 0;
+    text-align: left;
+    font-weight: 400;
+    vertical-align: middle;
+  }
+  tbody th {
+    width: 1%;
+    padding-right: var(--s4);
+    color: var(--text-2);
+    white-space: nowrap;
+  }
+  .mcs th {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .bar-cell {
+    display: grid;
+    grid-template-columns: 1fr 7ch;
+    align-items: center;
+    gap: var(--s3);
+  }
+  .track {
+    position: relative;
+    height: 12px;
+  }
+  .bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .ref {
+    position: absolute;
+    top: -6px;
+    bottom: -6px;
+    width: 1px;
+    background: var(--base);
+  }
+  .v {
+    text-align: right;
+  }
+  .d,
+  .s {
+    width: 1%;
+    padding-left: var(--s3);
+    color: var(--text-2);
+    text-align: right;
+    white-space: nowrap;
+  }
+  .good {
+    background: var(--good);
+  }
+  .base {
+    background: var(--base);
+  }
+  .bad {
+    background: var(--bad);
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s2) var(--s4);
+    margin-top: var(--s3);
+    font-size: var(--fs-xs);
+    color: var(--text-2);
+    max-width: none;
+  }
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sw {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+  .note {
+    margin-top: var(--s3);
+    font-size: var(--fs-xs);
+    color: var(--muted);
+  }
+  @media (max-width: 560px) {
+    .bar-cell {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+    .v {
+      text-align: left;
+    }
+    .s {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,48 @@
+title: { en: "BTC, NASDAQ and the Fed", es: "BTC, NASDAQ y la Fed" }
+status: research
+lenses: [quant]
+lens_rank: { ds: 7, quant: 2, ai: 8, de: 8 }
+year: "2025"
+featured: false
+stack: [Python, statsmodels, linearmodels, pmdarima, yfinance, fredapi, GitHub Actions]
+summary:
+  en: An econometric audit of whether Bitcoin is a safe haven or a systematic-risk amplifier, 2015–2025.
+  es: Auditoría econométrica de si Bitcoin es un activo refugio o un amplificador de riesgo sistemático, 2015-2025.
+problem:
+  en: "Is Bitcoin a hedge against tech stocks and interest-rate policy, or does it move with them? 122 monthly observations of BTC, the NASDAQ and the Fed funds rate."
+  es: "¿Bitcoin protege frente a las tecnológicas y la política de tipos, o se mueve con ellas? 122 observaciones mensuales de BTC, el NASDAQ y el tipo de la Fed."
+finding:
+  en: "The 0.94 correlation in levels is spurious (R² 0.88 with Durbin-Watson 0.36). In returns it is only 0.34. Yet the series do cointegrate: there is a real long-run link. Bitcoin behaves as a leveraged amplifier, not a safe haven."
+  es: "La correlación de 0,94 en niveles es espuria (R² 0,88 con Durbin-Watson 0,36). En retornos es solo 0,34. Aun así, las series cointegran: hay una relación real de largo plazo. Bitcoin funciona como amplificador apalancado, no como refugio."
+business:
+  en: "The error-correction model reverts 18.4% of a deviation per month (about 5.4 months to equilibrium). The Fed rate is not significant in levels, but in differences each percentage point of hikes moves BTC by −$5,270.78 (p = 0.031)."
+  es: "El modelo de corrección de error corrige un 18,4 % de la desviación al mes (unos 5,4 meses hasta el equilibrio). El tipo de la Fed no es significativo en niveles, pero en diferencias cada punto de subida mueve BTC en −5.270,78 $ (p = 0,031)."
+headline_text: { en: "Correlation 0.94 → 0.34", es: "Correlación 0,94 → 0,34" }
+comparison:
+  title: { en: "BTC–NASDAQ correlation: levels vs monthly returns", es: "Correlación BTC-NASDAQ: niveles frente a retornos mensuales" }
+  rows:
+    - { label: { en: Levels (spurious), es: Niveles (espuria) }, value: 0.94 }
+    - { label: { en: Monthly returns, es: Retornos mensuales }, value: 0.34 }
+  note:
+    en: "Shared trends inflate the correlation in levels. The right test is cointegration: ADF on the equilibrium residuals gives −3.91, below the 5% and 1% critical values."
+    es: "Las tendencias compartidas inflan la correlación en niveles. El contraste correcto es la cointegración: el ADF sobre los residuos del equilibrio da −3,91, por debajo de los críticos al 5 % y al 1 %."
+config:
+  data: "122 monthly observations, 2015–2025 (yfinance, FRED)"
+  stationarity: [ADF, KPSS]
+  diagnostics: [Durbin-Watson, Breusch-Pagan, Shapiro-Wilk]
+  models: [OLS in levels (diagnosed), "ARIMA / ARIMAX", Engle-Granger cointegration, error-correction model, IV-2SLS]
+  workflow: "54 commits, feature branches merged via pull request, CI on GitHub Actions"
+decisions:
+  - title: { en: Run OLS in levels to show why it fails, es: Estimar OLS en niveles para enseñar por qué falla }
+    body:
+      en: The diagnostic battery documents the spurious regression instead of just skipping it.
+      es: La batería de diagnósticos documenta la regresión espuria en vez de saltársela.
+  - title: { en: Instrument the NASDAQ, es: Instrumentar el NASDAQ }
+    body:
+      en: IV-2SLS addresses the endogeneity between BTC and the NASDAQ.
+      es: IV-2SLS atiende la endogeneidad entre BTC y el NASDAQ.
+notes:
+  - en: "The Fed rate in levels is not significant (p = 0.558): its effect only shows up in the short-run dynamics."
+    es: "El tipo de la Fed en niveles no es significativo (p = 0,558): su efecto solo aparece en la dinámica de corto plazo."
+artifacts:
+  repo: https://github.com/yeraybc/analisis-btc-nasdaq-fed

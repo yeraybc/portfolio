@@ -1,0 +1,44 @@
+---
+import type { Locale } from '../i18n/ui';
+import { useT } from '../i18n/utils';
+
+type Status = 'production' | 'running' | 'pilot' | 'research' | 'archived' | 'training';
+interface Props {
+  status: Status;
+  locale: Locale;
+}
+const { status, locale } = Astro.props;
+const t = useT(locale);
+const glyph: Record<Status, string> = {
+  production: '●',
+  running: '◐',
+  training: '◐',
+  pilot: '◇',
+  research: '▲',
+  archived: '○',
+};
+---
+
+<span class={`status status-${status}`}><span aria-hidden="true">{glyph[status]}</span> {t(`status.${status}`)}</span>
+
+<style>
+  .status {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--text-2);
+    white-space: nowrap;
+  }
+  .status-production span {
+    color: var(--good);
+  }
+  .status-running span,
+  .status-training span {
+    color: var(--live);
+  }
+  .status-archived {
+    color: var(--muted);
+  }
+</style>

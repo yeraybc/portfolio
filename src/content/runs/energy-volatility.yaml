@@ -1,0 +1,106 @@
+title: { en: "Energy volatility: GARCH vs HAR vs neural nets", es: "Volatilidad en energía: GARCH vs HAR vs redes" }
+status: research
+lenses: [quant, ds]
+lens_rank: { ds: 2, quant: 1, ai: 7, de: 7 }
+year: "2026"
+featured: true
+stack: [Python, PyTorch, arch, statsmodels, SciPy, pytest, GitHub Actions]
+summary:
+  en: Out-of-sample volatility forecasting and VaR backtesting for Brent and natural gas. Single-author paper in preparation for journal submission.
+  es: Predicción de volatilidad fuera de muestra y backtesting del VaR en Brent y gas natural. Paper de autoría única en preparación para envío a journal.
+problem:
+  en: Energy commodity volatility feeds straight into regulatory market-risk capital under Basel. Do neural networks really forecast it better than GARCH, and does a better forecast give a better Value-at-Risk?
+  es: La volatilidad de las materias primas energéticas entra directamente en el capital regulatorio por riesgo de mercado (Basilea). ¿Predicen de verdad mejor las redes neuronales que GARCH, y una mejor predicción da un mejor Value-at-Risk?
+finding:
+  en: "In natural gas the networks beat GARCH at the 1% level, but HAR, a linear model with 4 coefficients on the same range-based measure, matches or beats them. BiLSTM is statistically indistinguishable from HAR. The gain comes from modelling range-based variance, not from non-linearity, so the simpler model is the right choice."
+  es: "En gas natural las redes baten a GARCH al 1 %, pero el HAR, un modelo lineal de 4 coeficientes sobre la misma medida de rango, las iguala o mejora. BiLSTM no se distingue estadísticamente del HAR. La ganancia viene de modelar la varianza de rango, no de la no linealidad, así que el modelo simple es la elección correcta."
+business:
+  en: "HAR and BiLSTM cut the average 99% VaR by about 160 and 154 basis points against GARCH with no extra violations. On a position of 1,500 natural gas futures (about $45M), that frees $2.1M to $2.2M of regulatory capital."
+  es: "HAR y BiLSTM bajan el VaR99 % medio unos 160 y 154 puntos básicos frente a GARCH sin más excepciones. En una posición de 1.500 futuros de gas natural (unos 45 M USD), eso libera entre 2,1 y 2,2 M USD de capital regulatorio."
+baseline_label: { en: "GARCH(1,1)", es: "GARCH(1,1)" }
+headline_metric:
+  name: { en: QLIKE, es: QLIKE }
+  baseline: 0.1995
+  value: 0.0944
+  lower_is_better: true
+  decimals: 4
+metrics:
+  - name: { en: "QLIKE, natural gas, 5 days (HAR)", es: "QLIKE, gas natural, 5 días (HAR)" }
+    baseline: 0.1995
+    value: 0.0944
+    lower_is_better: true
+    decimals: 4
+    significance: "Diebold-Mariano t = −5.25, p < 0.001"
+  - name: { en: "QLIKE, natural gas, 5 days (BiLSTM)", es: "QLIKE, gas natural, 5 días (BiLSTM)" }
+    baseline: 0.1995
+    value: 0.1001
+    lower_is_better: true
+    decimals: 4
+    significance: "Diebold-Mariano t = −4.62, p < 0.001"
+  - name: { en: "QLIKE, natural gas, 1 day (HAR)", es: "QLIKE, gas natural, 1 día (HAR)" }
+    baseline: 0.3354
+    value: 0.2207
+    lower_is_better: true
+    decimals: 4
+    significance: "Diebold-Mariano t = −5.59, p < 0.001"
+  - name: { en: "QLIKE, Brent, 1 day (BiLSTM)", es: "QLIKE, Brent, 1 día (BiLSTM)" }
+    baseline: 0.3577
+    value: 0.3152
+    lower_is_better: true
+    decimals: 4
+    significance: "p = 0.030, not robust to the proxy change"
+leaderboard:
+  title: { en: "Natural gas, 5-day horizon: QLIKE by model (lower is better)", es: "Gas natural, horizonte de 5 días: QLIKE por modelo (menor es mejor)" }
+  metric: QLIKE
+  baseline: "GARCH(1,1)"
+  rows:
+    - { model: "HAR-GK", value: 0.0944, delta_pct: -52.68, sig: "***", in_mcs: true }
+    - { model: "BiLSTM", value: 0.1001, delta_pct: -49.81, sig: "***", in_mcs: true }
+    - { model: "Temporal attention", value: 0.1160, delta_pct: -41.86, sig: "***", in_mcs: false }
+    - { model: "EGARCH(1,1)", value: 0.1903, delta_pct: -4.61, sig: "ns", in_mcs: false }
+    - { model: "GARCH(1,1)", value: 0.1995, sig: "baseline", in_mcs: false }
+    - { model: "GJR-GARCH(1,1)", value: 0.2104, delta_pct: 5.47, sig: "***", in_mcs: false }
+  note:
+    en: "Test set: 498 days (Jan 2024 to Dec 2025). Stars: Diebold-Mariano against GARCH with Newey-West and Harvey corrections (*** p < 0.01, ns not significant). Only HAR and BiLSTM stay in the Model Confidence Set."
+    es: "Conjunto de test: 498 días (ene-2024 a dic-2025). Estrellas: Diebold-Mariano frente a GARCH con correcciones de Newey-West y Harvey (*** p < 0,01, ns no significativo). Solo HAR y BiLSTM quedan dentro del Model Confidence Set."
+config:
+  data:
+    assets: ["Brent (BZ=F, ICE)", "Henry Hub natural gas (NG=F, NYMEX)"]
+    period: "2018–2025, 2,013 daily returns"
+    target: Garman-Klass range estimator
+  split:
+    train: "2018–2022"
+    validation: "2023"
+    test: "2024–2025"
+    embargo: "5 sessions between blocks (López de Prado)"
+    refit_in_test: false
+  models: ["GARCH(1,1)", "EGARCH(1,1)", "GJR-GARCH(1,1)", "HAR (Corsi)", "BiLSTM", "Temporal self-attention"]
+  training: "AdamW, cosine annealing, early stopping, 5 seeds"
+  evaluation: [QLIKE, Diebold-Mariano, Model Confidence Set, Kupiec, Christoffersen, Basel traffic light]
+  engineering: "63 pytest tests, GitHub Actions CI, Makefile, Conda environment"
+decisions:
+  - title: { en: Add HAR to separate the two effects, es: Añadir el HAR para separar los dos efectos }
+    body:
+      en: HAR is estimated on the same range-based measure as the networks. That isolates "using range information" from "being non-linear", which is the question that actually matters.
+      es: El HAR se estima sobre la misma medida de rango que las redes. Así se separa "usar información de rango" de "ser no lineal", que es la pregunta que de verdad importa.
+  - title: { en: Embargo between splits, es: Embargo entre particiones }
+    body:
+      en: A 5-session embargo between train, validation and test avoids look-ahead bias, and no model is re-estimated on test.
+      es: Un embargo de 5 sesiones entre entrenamiento, validación y test evita el sesgo de anticipación, y ningún modelo se reestima en test.
+  - title: { en: "Significance, not just a lower number", es: "Significancia, no solo un número menor" }
+    body:
+      en: Diebold-Mariano with finite-sample corrections, the Model Confidence Set for multiple comparisons, VaR backtests and the Basel traffic light.
+      es: Diebold-Mariano con correcciones para muestra finita, Model Confidence Set para las comparaciones múltiples, backtesting del VaR y semáforo de Basilea.
+  - title: { en: Check robustness, es: Comprobar la robustez }
+    body:
+      en: An alternative proxy (Yang-Zhang), squared returns, and 5 random seeds for the networks, so the result does not depend on one initialisation.
+      es: Un proxy alternativo (Yang-Zhang), retornos al cuadrado y 5 semillas para las redes, para que el resultado no dependa de una inicialización.
+notes:
+  - en: "In Brent, neither the networks nor HAR improve robustly on a plain GARCH(1,1)."
+    es: "En Brent, ni las redes ni el HAR mejoran de forma robusta a un GARCH(1,1) simple."
+  - en: The inverse leverage effect (asymmetric GARCH) is not confirmed for either asset.
+    es: El efecto apalancamiento inverso (GARCH asimétricos) no se confirma en ningún activo.
+  - en: "The repository is private until the paper is submitted; the LinkedIn post summarises it."
+    es: "El repositorio es privado hasta el envío del paper; el post de LinkedIn lo resume."
+artifacts:
+  linkedin: https://www.linkedin.com/feed/update/urn:li:activity:7506652202367848448/

@@ -1,0 +1,87 @@
+title: { en: MadridDataHouse, es: MadridDataHouse }
+status: production
+lenses: [ds, quant]
+lens_rank: { ds: 1, quant: 4, ai: 6, de: 5 }
+year: "2026"
+featured: true
+stack: [R, XGBoost, Random Forest, spdep, spatialreg, gstat, tidymodels, Shiny]
+summary:
+  en: Spatial ML property valuation for Madrid, live as a free Shiny app.
+  es: Tasación de viviendas en Madrid con ML espacial, en producción como app gratuita de Shiny.
+problem:
+  en: Online valuation sites ask for your data and then show you an ad or a contact form instead of a price. The goal was a free, instant estimate for any home in Madrid, without giving away personal data.
+  es: Las tasadoras online piden tus datos y, en vez de un precio, te enseñan un anuncio o un formulario de contacto. El objetivo era una estimación gratuita e instantánea para cualquier vivienda de Madrid, sin ceder datos personales.
+finding:
+  en: The price of the surrounding homes predicts more than the home's own features. Your neighbours set the value of your flat more than your square metres do.
+  es: El precio del entorno predice más que las características de la propia vivienda. Tus vecinos marcan el valor de tu piso más que tus metros cuadrados.
+business:
+  en: "For a typical 80 m² home (about €284,000), the valuation error drops from €53,900 to €42,300: €11,600 less, from 19.0% to 14.9% of the property value."
+  es: "En una vivienda tipo de 80 m² (unos 284.000 €), el error de tasación baja de 53.900 € a 42.300 €: 11.600 € menos, del 19,0 % al 14,9 % del valor del inmueble."
+baseline_label: { en: OLS, es: OLS }
+headline_metric:
+  name: { en: RMSE, es: RMSE }
+  unit: "€/m²"
+  baseline: 907
+  value: 745
+  lower_is_better: true
+  reported_pct: -17.8
+metrics:
+  - name: { en: RMSE, es: RMSE }
+    unit: "€/m²"
+    baseline: 907
+    value: 745
+    lower_is_better: true
+    reported_pct: -17.8
+  - name: { en: MAE, es: MAE }
+    unit: "€/m²"
+    baseline: 674
+    value: 529
+    lower_is_better: true
+  - name: { en: R², es: R² }
+    baseline: 0.43
+    value: 0.62
+    decimals: 2
+  - name: { en: "Moran's I on residuals", es: "I de Moran de los residuos" }
+    baseline: 0.21
+    value: -0.03
+    target: 0
+    decimals: 2
+    significance: "p = 0.002 → p = 0.998"
+config:
+  data:
+    homes: "10,512 Madrid listings"
+    test_set: "5,229 unseen homes"
+    sources: [housing features, neighbourhood socio-economics, Madrid Geoportal cartography]
+  features:
+    spatial_weights: "KNN, k = 8"
+    neighbourhood_lags: [price, crime, income, immigration]
+  models: [OLS (baseline), SAR, Random Forest, XGBoost]
+  geostatistical_check: Universal Kriging
+  tuning: hyperparameter search for RF and XGBoost
+  deployment: Shiny app on shinyapps.io
+decisions:
+  - title: { en: "Treat location as signal, not noise", es: "La localización como señal, no como ruido" }
+    body:
+      en: House prices are not independent of their neighbours, so the OLS independence assumption fails. Neighbourhood lags of price, crime, income and immigration enter as explicit predictors.
+      es: El precio de una vivienda no es independiente del de sus vecinas, así que el supuesto de independencia del OLS no se cumple. Los retardos de vecindario de precio, criminalidad, renta e inmigración entran como predictores explícitos.
+  - title: { en: Four model families against one baseline, es: Cuatro familias frente a un baseline }
+    body:
+      en: OLS as the reference, SAR for parametric spatial dependence, Random Forest and XGBoost for non-linearity, and Universal Kriging as an independent geostatistical check.
+      es: OLS como referencia, SAR para la dependencia espacial paramétrica, Random Forest y XGBoost para la no linealidad, y Kriging Universal como contraste geoestadístico independiente.
+  - title: { en: Choose the model with no geographic bias, es: Elegir el modelo sin sesgo geográfico }
+    body:
+      en: "XGBoost is less interpretable than OLS, but its residuals show no spatial autocorrelation (Moran's I −0.03, p = 0.998, against 0.21, p = 0.002). It does not systematically over- or under-value whole neighbourhoods."
+      es: "XGBoost es menos interpretable que OLS, pero sus residuos no tienen autocorrelación espacial (I de Moran −0,03, p = 0,998, frente a 0,21, p = 0,002). No sobrevalora ni infravalora barrios enteros de forma sistemática."
+  - title: { en: Ship it, es: Ponerlo en producción }
+    body:
+      en: The model runs in a public Shiny app, so anyone can value a home without handing over personal data.
+      es: El modelo funciona en una app pública de Shiny, así que cualquiera puede tasar una vivienda sin ceder datos personales.
+notes:
+  - en: SAR models the spatial dependence explicitly but cannot capture the non-linear effects that tree ensembles do.
+    es: SAR modela la dependencia espacial de forma explícita, pero no recoge los efectos no lineales que sí capturan los ensembles de árboles.
+  - en: Kriging served as a cross-check, not as the production model.
+    es: El Kriging sirvió como contraste, no como modelo de producción.
+artifacts:
+  repo: https://github.com/yeraybc/MadridDataHouse
+  app: https://yeraybc.shinyapps.io/MadridDataHouse/
+generated_deployment: velle-capital

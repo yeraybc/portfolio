@@ -1,0 +1,146 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Stack from '../components/Stack.astro';
+import type { Locale } from '../i18n/ui';
+import { useT, tr, localePath } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useT(locale);
+const deps = (await getCollection('deployments')).sort((a, b) => a.data.order - b.data.order);
+const runs = await getCollection('runs');
+const runTitle = (id: string) => {
+  const r = runs.find((x) => x.id === id);
+  return r ? tr(r.data.title, locale) : id;
+};
+---
+
+<Base locale={locale} path="/deployments" title={t('dep.title')} description={t('dep.lede')}>
+  <header class="page-head">
+    <h1>{t('dep.title')}</h1>
+    <p>{t('dep.lede')}</p>
+  </header>
+
+  <ol class="timeline">
+    {
+      deps.map((dep) => (
+        <li class={dep.data.live ? 'is-live' : ''}>
+          <div class="when">
+            <span class="num">{tr(dep.data.period, locale)}</span>
+            <span class="where">{tr(dep.data.location, locale)}</span>
+          </div>
+          <article class="card panel">
+            <header>
+              <p class="state num">
+                <span aria-hidden="true">{dep.data.live ? '●' : '○'}</span> {dep.data.live ? t('dep.live') : t('dep.ended')}
+              </p>
+              <h2>{dep.data.org}</h2>
+              <p class="role">{tr(dep.data.role, locale)}</p>
+            </header>
+            <p class="context">{tr(dep.data.context, locale)}</p>
+            <ul class="hl">
+              {dep.data.highlights.map((h) => (
+                <li>{tr(h, locale)}</li>
+              ))}
+            </ul>
+            <Stack items={dep.data.stack} />
+            {dep.data.related_runs.length > 0 && (
+              <p class="related">
+                <span class="muted">{t('nav.runs')}:</span>
+                {dep.data.related_runs.map((id) => (
+                  <a href={localePath(`/runs/${id}`, locale)} data-internal>
+                    {runTitle(id)}
+                  </a>
+                ))}
+              </p>
+            )}
+          </article>
+        </li>
+      ))
+    }
+  </ol>
+</Base>
+
+<style>
+  .timeline {
+    display: grid;
+    gap: var(--s5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .timeline > li {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: var(--s5);
+  }
+  .when {
+    display: grid;
+    align-content: start;
+    gap: 2px;
+    padding-top: var(--s5);
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+  }
+  .where {
+    color: var(--muted);
+    font-size: var(--fs-xs);
+  }
+  .card {
+    display: grid;
+    gap: var(--s3);
+    padding: var(--s5);
+  }
+  .is-live .card {
+    border-left: 2px solid var(--live);
+  }
+  .state {
+    font-size: var(--fs-xs);
+    color: var(--muted);
+  }
+  .is-live .state {
+    color: var(--text-2);
+  }
+  .is-live .state span {
+    color: var(--live);
+  }
+  h2 {
+    font-family: var(--font-cond);
+    font-size: var(--fs-xl);
+  }
+  .role {
+    color: var(--text-2);
+  }
+  .context {
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+  }
+  .hl {
+    display: grid;
+    gap: var(--s2);
+    margin: 0;
+    padding-left: 1.1em;
+    max-width: 72ch;
+  }
+  .related {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s2) var(--s4);
+    font-size: var(--fs-sm);
+  }
+  @media (max-width: 720px) {
+    .timeline > li {
+      grid-template-columns: 1fr;
+      gap: var(--s2);
+    }
+    .when {
+      padding-top: 0;
+      grid-auto-flow: column;
+      justify-content: start;
+      gap: var(--s3);
+    }
+  }
+</style>

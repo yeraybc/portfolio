@@ -1,0 +1,25 @@
+title: { en: Salary predictor, es: Salary predictor }
+status: archived
+lenses: [ds]
+lens_rank: { ds: 9, quant: 9, ai: 9, de: 10 }
+year: "2026"
+featured: false
+stack: [Python, scikit-learn, SHAP]
+summary:
+  en: Explainable salary regression with SHAP and a simulator. An early learning project.
+  es: Regresión salarial explicable con SHAP y un simulador. Proyecto de iniciación.
+problem:
+  en: How much should someone with a given profile earn, and are they underpaid?
+  es: ¿Cuánto debería cobrar alguien con un perfil dado y está infravalorado?
+finding:
+  en: The two most predictive variables were engineered ones, ahead of every original column.
+  es: Las dos variables más predictivas eran de creación propia, por delante de todas las originales.
+headline_text: { en: "R² 0.916 on test", es: "R² 0,916 en test" }
+config:
+  data: "250,000 rows, 10 original + 16 engineered features"
+  models: [ElasticNet, KNN, Random Forest, Gradient Boosting]
+  tuning: GridSearchCV
+  explainability: SHAP
+decisions: []
+artifacts:
+  repo: https://github.com/yeraybc/salary_predictor

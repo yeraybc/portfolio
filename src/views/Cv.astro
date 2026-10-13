@@ -1,0 +1,335 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import type { Locale } from '../i18n/ui';
+import { useT, tr, localePath } from '../i18n/utils';
+import { contact, certs, education, languages, skills, otherWork } from '../data/profile';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useT(locale);
+const es = locale === 'es';
+const deps = (await getCollection('deployments')).sort((a, b) => a.data.order - b.data.order);
+const runs = await getCollection('runs');
+const run = (id: string) => runs.find((r) => r.id === id)!.data;
+const site = Astro.site!.host;
+
+const projects = [
+  {
+    id: 'madrid-data-house',
+    line: es
+      ? 'ML espacial en R (XGBoost, SAR, Kriging) sobre viviendas de Madrid, en producción como app de Shiny. Frente a OLS: RMSE 907 → 745 €/m² (−17,8 %), R² 0,43 → 0,62 y sin autocorrelación espacial en los residuos (I de Moran 0,21 → −0,03).'
+      : "Spatial ML in R (XGBoost, SAR, Kriging) on Madrid homes, live as a Shiny app. Against OLS: RMSE 907 → 745 €/m² (−17.8%), R² 0.43 → 0.62, and no spatial autocorrelation left in the residuals (Moran's I 0.21 → −0.03).",
+  },
+  {
+    id: 'energy-volatility',
+    line: es
+      ? 'Paper de autoría única (en preparación para journal). GARCH, HAR, BiLSTM y atención en PyTorch para Brent y gas natural, con embargo, Diebold-Mariano, MCS y backtesting del VaR. En gas, HAR baja la QLIKE un 52,7 % frente a GARCH y la red no lo supera: la ganancia viene de la medida de rango, no de la no linealidad.'
+      : 'Single-author paper, in preparation for journal submission. GARCH, HAR, BiLSTM and attention (PyTorch) on Brent and natural gas, with embargoed splits, Diebold-Mariano, MCS and VaR backtests. In gas, HAR cuts QLIKE by 52.7% against GARCH and the network does not beat it: the gain comes from the range measure, not non-linearity.',
+  },
+  {
+    id: 'home-credit',
+    line: es
+      ? 'Pipeline de credit scoring sobre 31M de filas en Python: memoria −90 % (4,9 → 0,5 GB), 163 features, 1.507 tests, CI y validación en 15 folds con un holdout que solo se usa una vez. Modelado en curso.'
+      : 'Credit scoring pipeline on 31M rows in Python: memory −90% (4.9 → 0.5 GB), 163 features, 1,507 tests, CI and 15-fold validation with a holdout used exactly once. Modelling in progress.',
+  },
+  {
+    id: 'btc-nasdaq-fed',
+    line: es
+      ? 'Auditoría econométrica: la correlación BTC-NASDAQ de 0,94 en niveles es espuria (0,34 en retornos), pero las series cointegran; ECM e IV-2SLS.'
+      : 'Econometric audit: the 0.94 BTC–NASDAQ correlation in levels is spurious (0.34 in returns), yet the series cointegrate; ECM and IV-2SLS.',
+  },
+];
+const pick = (k: string) => certs.find((c) => c.name.includes(k))!;
+const cvCerts = [
+  pick('Samsung'),
+  pick('Unstructured'),
+  pick('FRM'),
+  {
+    name: es ? 'SQL (PostgreSQL): Data Analysis, top 1 %; Data Management, top 3 %' : 'SQL (PostgreSQL): Data Analysis, top 1%; Data Management, top 3%',
+    issuer: 'DataCamp',
+    date: { en: 'Nov 2025', es: 'nov 2025' },
+  },
+  pick('GitHub'),
+  pick('Google'),
+];
+---
+
+<Base locale={locale} path="/cv" title={t('cv.title')} description={t('cv.lede')} printable>
+  <div class="cv-actions no-print">
+    <p class="muted">{t('cv.lede')}</p>
+    <button type="button" class="btn btn-primary" data-print>{t('cta.downloadCv')}</button>
+  </div>
+
+  <article class="cv">
+    <header class="cv-head">
+      <h1>Yeray Benito</h1>
+      <p class="cv-role">{t('role')}</p>
+      <p class="cv-contact">
+        <span>{t('location')}</span>
+        <a href={`mailto:${contact.email}`}>{contact.email}</a>
+        <a href={contact.linkedin}>linkedin.com/in/yeraybenit0</a>
+        <a href={contact.github}>github.com/yeraybc</a>
+        <a href={`https://${site}`}>{site}</a>
+      </p>
+      <p class="cv-sum">
+        {
+          es
+            ? 'Data Scientist en formación (UCM, 2027) en prácticas en Velle Capital. Modelos evaluados siempre frente a un baseline, con contrastes de significancia, control de fugas de datos y código con tests. Disponible para prácticas a jornada completa desde febrero de 2027.'
+            : 'Data Scientist (UCM, 2027) interning at Velle Capital. I evaluate every model against a baseline, with significance tests, leakage control and tested code. Available for a full-time internship from February 2027.'
+        }
+      </p>
+    </header>
+
+    <section>
+      <h2>{t('cv.experience')}</h2>
+      {
+        deps.map((d) => (
+          <div class="item">
+            <div class="item-head">
+              <h3>
+                {tr(d.data.role, locale)}, {d.data.org}
+              </h3>
+              <span class="when">{tr(d.data.period, locale)}</span>
+            </div>
+            <ul>
+              {d.data.highlights.slice(0, d.data.live ? 3 : 2).map((h) => (
+                <li>{tr(h, locale)}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </section>
+
+    <section>
+      <h2>{t('cv.projects')}</h2>
+      {
+        projects.map((p) => (
+          <div class="item">
+            <div class="item-head">
+              <h3>
+                <a href={localePath(`/runs/${p.id}`, locale)}>{tr(run(p.id).title, locale)}</a>
+              </h3>
+              <span class="when">{run(p.id).year}</span>
+            </div>
+            <p>{p.line}</p>
+          </div>
+        ))
+      }
+    </section>
+
+    <div class="cols">
+      <section>
+        <h2>{t('cv.education')}</h2>
+        <div class="item">
+          <div class="item-head stack">
+            <h3>{tr(education.degree, locale)}</h3>
+            <span class="when">{tr(education.period, locale)}</span>
+          </div>
+          <p>{education.school}. {tr(education.courses, locale)}.</p>
+        </div>
+        <h2 class="sub">{t('cv.certs')}</h2>
+        <ul class="tight">
+          {
+            cvCerts.map((c) => (
+              <li>
+                <strong>{c.name}</strong>, {c.issuer} ({tr(c.date, locale)})
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+      <section>
+        <h2>{t('cv.skills')}</h2>
+        <dl class="skills">
+          {
+            skills.map((s) => (
+              <div>
+                <dt>{tr(s.group, locale)}</dt>
+                <dd>{s.items.join(', ')}</dd>
+              </div>
+            ))
+          }
+          <div>
+            <dt>{t('cv.languages')}</dt>
+            <dd>{languages.map((l) => `${tr(l.name, locale)} (${tr(l.level, locale)})`).join(', ')}</dd>
+          </div>
+        </dl>
+        <h2 class="sub">{t('cv.other')}</h2>
+        <p class="other">{tr(otherWork, locale)}</p>
+      </section>
+    </div>
+  </article>
+</Base>
+
+<script>
+  document.querySelector('[data-print]')?.addEventListener('click', () => window.print());
+</script>
+
+<style>
+  .cv-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s3);
+    margin-bottom: var(--s4);
+  }
+  .cv {
+    display: grid;
+    gap: var(--s5);
+    padding: clamp(var(--s4), 4vw, var(--s7));
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+  }
+  .cv-head {
+    display: grid;
+    gap: var(--s1);
+  }
+  h1 {
+    font-family: var(--font-cond);
+    font-size: var(--fs-2xl);
+  }
+  .cv-role {
+    font-size: var(--fs-lg);
+    color: var(--text-2);
+  }
+  .cv-contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s1) var(--s4);
+    margin-top: var(--s1);
+    color: var(--text-2);
+    max-width: none;
+  }
+  .cv-sum {
+    margin-top: var(--s2);
+    max-width: none;
+  }
+  h2 {
+    margin-bottom: var(--s2);
+    padding-bottom: var(--s1);
+    border-bottom: 1px solid var(--rule);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text);
+  }
+  h2.sub {
+    margin-top: var(--s4);
+  }
+  .item {
+    margin-bottom: var(--s3);
+  }
+  .item-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--s3);
+  }
+  h3 {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+  h3 a {
+    text-decoration: none;
+  }
+  .when {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--text-2);
+  }
+  .item p {
+    max-width: none;
+  }
+  .item-head.stack {
+    flex-direction: column;
+    gap: 0;
+  }
+  ul {
+    margin: var(--s1) 0 0;
+    padding-left: 1.1em;
+    display: grid;
+    gap: 2px;
+  }
+  .tight {
+    gap: 2px;
+  }
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s6);
+  }
+  .skills {
+    display: grid;
+    gap: var(--s1);
+    margin: 0;
+  }
+  .skills div {
+    display: grid;
+    grid-template-columns: 9em 1fr;
+    gap: var(--s2);
+  }
+  .skills dt {
+    color: var(--text-2);
+  }
+  .skills dd {
+    margin: 0;
+  }
+  .other {
+    color: var(--text-2);
+  }
+  @media (max-width: 720px) {
+    .cols {
+      grid-template-columns: 1fr;
+    }
+    .item-head {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+
+  @media print {
+    .cv {
+      padding: 0;
+      border: 0;
+      gap: 9pt;
+      font-size: 8.6pt;
+      line-height: 1.38;
+    }
+    h1 {
+      font-size: 19pt;
+    }
+    .cv-role {
+      font-size: 10.5pt;
+    }
+    h2 {
+      font-size: 9pt;
+      margin-bottom: 3pt;
+    }
+    h2.sub {
+      margin-top: 7pt;
+    }
+    h3 {
+      font-size: 8.8pt;
+    }
+    .item {
+      margin-bottom: 5pt;
+    }
+    .cols {
+      gap: 16pt;
+    }
+    .when {
+      font-size: 7.6pt;
+    }
+    a {
+      text-decoration: none;
+    }
+  }
+</style>

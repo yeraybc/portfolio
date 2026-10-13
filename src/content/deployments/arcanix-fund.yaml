@@ -1,0 +1,22 @@
+org: Arcanix Fund
+role: { en: Commodity Analyst, es: Commodity Analyst }
+live: false
+start: "2025-09-01"
+end: "2026-09-30"
+period: { en: "Sep 2025 – Sep 2026", es: "sep 2025 – sep 2026" }
+location: { en: "Madrid, remote", es: "Madrid, en remoto" }
+order: 2
+lenses: [quant, ds]
+lens_rank: { ds: 2, quant: 2, ai: 3, de: 3 }
+context:
+  en: A non-profit UCM student investment association. I covered commodities for a 6-person team that used my reports to make allocation decisions in 6-week cycles.
+  es: Una asociación de inversión de estudiantes de la UCM sin ánimo de lucro. Cubría materias primas para un equipo de 6 personas que usaba mis informes para decidir asignaciones en ciclos de 6 semanas.
+highlights:
+  - en: "The team followed my time-series recommendation to weight one asset over another; over a 6-week cycle it outperformed by 3 percentage points."
+    es: "El equipo siguió mi recomendación, basada en series temporales, de dar más peso a un activo que a otro; en un ciclo de 6 semanas rindió 3 puntos porcentuales más."
+  - en: "Built time-series and ML pipelines for 6 commodities: data extraction, model selection, stability tests and the final report, presented in team meetings."
+    es: "Construí pipelines de series temporales y ML para 6 materias primas: extracción de datos, selección de modelo, tests de estabilidad e informe final, presentado en reunión."
+  - en: Taught the team Git and GitHub workflows, and organised roles and task split.
+    es: Enseñé al equipo el flujo de trabajo con Git y GitHub, y organicé roles y reparto de tareas.
+stack: [Python, statsmodels, scikit-learn, Git]
+related_runs: [energy-volatility]

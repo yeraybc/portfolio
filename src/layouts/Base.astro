@@ -1,0 +1,170 @@
+---
+import '@fontsource/ibm-plex-sans/latin-400.css';
+import '@fontsource/ibm-plex-sans/latin-500.css';
+import '@fontsource/ibm-plex-sans/latin-600.css';
+import '@fontsource/ibm-plex-sans-condensed/latin-600.css';
+import '@fontsource/jetbrains-mono/latin-400.css';
+import '@fontsource/jetbrains-mono/latin-500.css';
+import '../styles/global.css';
+import plex400 from '@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2?url';
+import plexCond600 from '@fontsource/ibm-plex-sans-condensed/files/ibm-plex-sans-condensed-latin-600-normal.woff2?url';
+import mono400 from '@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2?url';
+import Sidebar from '../components/Sidebar.astro';
+import CommandPalette from '../islands/CommandPalette.tsx';
+import { getCollection } from 'astro:content';
+import type { Locale } from '../i18n/ui';
+import { useT, localePath, tr } from '../i18n/utils';
+import { contact, lensStack } from '../data/profile';
+
+interface Props {
+  locale: Locale;
+  /** Locale-free path of this page, e.g. "/runs/home-credit". */
+  path: string;
+  title?: string;
+  description?: string;
+  printable?: boolean;
+}
+
+const { locale, path, title, description, printable = false } = Astro.props;
+const t = useT(locale);
+const fullTitle = title ? `${title} · Yeray Benito` : t('meta.title');
+const desc = description ?? t('meta.description');
+const site = Astro.site!;
+const canonical = new URL(localePath(path, locale), site).href;
+const alternates = (['en', 'es'] as const).map((l) => ({ l, href: new URL(localePath(path, l), site).href }));
+const ogImage = new URL('/og.png', site).href;
+
+const runs = (await getCollection('runs')).filter((r) => !r.data.hidden);
+const paletteData = {
+  locale,
+  email: contact.email,
+  pages: [
+    { label: t('nav.overview'), href: localePath('/', locale) },
+    { label: t('nav.runs'), href: localePath('/runs', locale) },
+    { label: t('nav.compare'), href: localePath('/compare', locale) },
+    { label: t('nav.deployments'), href: localePath('/deployments', locale) },
+    { label: t('nav.modelCard'), href: localePath('/model-card', locale) },
+    { label: t('nav.cv'), href: localePath('/cv', locale) },
+  ],
+  runs: runs.map((r) => ({ label: tr(r.data.title, locale), hint: tr(r.data.summary, locale), href: localePath(`/runs/${r.id}`, locale) })),
+  otherLocaleHref: localePath(path, locale === 'en' ? 'es' : 'en'),
+  strings: {
+    placeholder: t('cmdk.placeholder'),
+    empty: t('cmdk.empty'),
+    pages: t('cmdk.pages'),
+    runs: t('cmdk.runs'),
+    actions: t('cmdk.actions'),
+    copyEmail: t('cmdk.copyEmail'),
+    copied: t('cmdk.copied'),
+    theme: t('theme.toggle'),
+    lang: t('lang.switch'),
+    lensLabel: t('lens.label'),
+    lenses: { ds: t('lens.ds'), quant: t('lens.quant'), ai: t('lens.ai'), de: t('lens.de') },
+    email: t('cta.email'),
+  },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: contact.name,
+  jobTitle: 'Data Scientist',
+  email: `mailto:${contact.email}`,
+  url: new URL('/', site).href,
+  address: { '@type': 'PostalAddress', addressLocality: 'Madrid', addressCountry: 'ES' },
+  alumniOf: 'Universidad Complutense de Madrid',
+  sameAs: [contact.linkedin, contact.github],
+  knowsAbout: ['Machine learning', 'Spatial econometrics', 'Volatility forecasting', 'Credit risk', 'LLM agents'],
+};
+---
+
+<!doctype html>
+<html lang={locale} data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={desc} />
+    <link rel="canonical" href={canonical} />
+    {alternates.map(({ l, href }) => <link rel="alternate" hreflang={l} href={href} />)}
+    <link rel="alternate" hreflang="x-default" href={alternates[0].href} />
+    {[plex400, plexCond600, mono400].map((href) => <link rel="preload" as="font" type="font/woff2" href={href} crossorigin />)}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#0f1624" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content={locale === 'es' ? 'es_ES' : 'en_GB'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script is:inline>
+      // Theme before paint: stored choice wins; dark is the default.
+      document.documentElement.classList.add('js');
+      try {
+        const t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
+  </head>
+  <body class={printable ? 'printable' : undefined}>
+    <a class="skip-link" href="#main">{t('nav.skip')}</a>
+    <div class="shell">
+      <Sidebar locale={locale} path={path} />
+      <main id="main" tabindex="-1">
+        <slot />
+        <footer class="site-footer">
+          <p>
+            <a href={`mailto:${contact.email}`}>{contact.email}</a>
+            <span aria-hidden="true"> / </span>
+            <a href={contact.linkedin} rel="me">LinkedIn</a>
+            <span aria-hidden="true"> / </span>
+            <a href={contact.github} rel="me">GitHub</a>
+          </p>
+          <p class="muted">{t('footer.built')}</p>
+        </footer>
+      </main>
+    </div>
+    <CommandPalette client:idle data={paletteData} />
+    <script type="application/json" id="lens-stack" set:html={JSON.stringify(lensStack)} />
+    <script>
+      import { initChrome } from '../lib/chrome';
+      initChrome();
+    </script>
+  </body>
+</html>
+
+<style>
+  .shell {
+    display: grid;
+    grid-template-columns: var(--sidebar) minmax(0, 1fr);
+    min-height: 100vh;
+  }
+  main {
+    min-width: 0;
+    padding: var(--s7) clamp(var(--s4), 4vw, var(--s8)) var(--s6);
+    max-width: 1120px;
+  }
+  main:focus {
+    outline: none;
+  }
+  .site-footer {
+    display: grid;
+    gap: var(--s2);
+    margin-top: var(--s8);
+    padding-top: var(--s5);
+    border-top: 1px solid var(--rule);
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+  }
+  @media (max-width: 960px) {
+    .shell {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    main {
+      padding-top: var(--s5);
+    }
+  }
+</style>

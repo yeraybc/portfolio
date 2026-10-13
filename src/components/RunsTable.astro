@@ -1,0 +1,217 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { Locale } from '../i18n/ui';
+import { tr, useT, localePath } from '../i18n/utils';
+import { fmtNum, fmtBaseline, withUnit } from '../lib/format';
+import StatusBadge from './StatusBadge.astro';
+import Delta from './Delta.astro';
+import Stack from './Stack.astro';
+
+interface Props {
+  runs: CollectionEntry<'runs'>[];
+  locale: Locale;
+  id?: string;
+  maxStack?: number;
+}
+const { runs, locale, id, maxStack = 4 } = Astro.props;
+const t = useT(locale);
+---
+
+<div class="table-wrap">
+  <table class="runs" id={id}>
+    <thead>
+      <tr>
+        <th scope="col">{t('runs.col.run')}</th>
+        <th scope="col">{t('runs.col.status')}</th>
+        <th scope="col">{t('runs.col.metric')}</th>
+        <th scope="col" class="c-stack">{t('runs.col.stack')}</th>
+        <th scope="col" class="c-year">{t('runs.col.date')}</th>
+      </tr>
+    </thead>
+    <tbody data-lens-sort>
+      {
+        runs.map((run) => {
+          const d = run.data;
+          const m = d.headline_metric;
+          return (
+            <tr
+              data-run={run.id}
+              data-status={d.status}
+              data-stack={d.stack.join('|')}
+              data-lenses={d.lenses.join(' ')}
+              data-rank-ds={d.lens_rank.ds}
+              data-rank-quant={d.lens_rank.quant}
+              data-rank-ai={d.lens_rank.ai}
+              data-rank-de={d.lens_rank.de}
+            >
+              <th scope="row" class="c-run">
+                <a href={localePath(`/runs/${run.id}`, locale)} data-internal>
+                  {tr(d.title, locale)}
+                </a>
+                <span class="summary">{tr(d.summary, locale)}</span>
+              </th>
+              <td class="c-status">
+                <StatusBadge status={d.status} locale={locale} />
+              </td>
+              <td class="c-metric">
+                {d.sealed ? (
+                  <span class="sealed">
+                    {d.headline_text && <span class="num">{tr(d.headline_text, locale)}</span>}
+                    <span class="lock">
+                      <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+                        <rect x="2" y="5" width="8" height="6" rx="1" fill="currentColor" />
+                        <path d="M4 5V3.5a2 2 0 0 1 4 0V5" fill="none" stroke="currentColor" stroke-width="1.3" />
+                      </svg>
+                      {t('run.sealed')}
+                    </span>
+                  </span>
+                ) : m ? (
+                  <span class="metric">
+                    <span class="mname">{tr(m.name, locale)}</span>
+                    <span class="num">
+                      {fmtBaseline(m, locale)} → {withUnit(fmtNum(m.value, locale, m.decimals), m.unit)}
+                    </span>
+                    <Delta metric={m} locale={locale} />
+                  </span>
+                ) : d.headline_text ? (
+                  <span class="num">{tr(d.headline_text, locale)}</span>
+                ) : (
+                  <span class="muted">—</span>
+                )}
+              </td>
+              <td class="c-stack">
+                <Stack items={d.stack} max={maxStack} />
+              </td>
+              <td class="c-year num">{d.year}</td>
+            </tr>
+          );
+        })
+      }
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .table-wrap {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+  }
+  .runs {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-sm);
+  }
+  thead th {
+    padding: var(--s3) var(--s4);
+    border-bottom: 1px solid var(--rule);
+    color: var(--muted);
+    font-weight: 500;
+    font-size: var(--fs-xs);
+    text-align: left;
+    white-space: nowrap;
+  }
+  td,
+  tbody th {
+    padding: var(--s3) var(--s4);
+    border-bottom: 1px solid var(--rule);
+    text-align: left;
+    vertical-align: top;
+    font-weight: 400;
+  }
+  tbody tr:last-child > * {
+    border-bottom: 0;
+  }
+  tbody tr:hover {
+    background: var(--panel-2);
+  }
+  .c-run a {
+    display: block;
+    font-family: var(--font-cond);
+    font-weight: 600;
+    font-size: var(--fs-md);
+    text-decoration: none;
+  }
+  .c-run a:hover {
+    text-decoration: underline;
+  }
+  .summary {
+    display: block;
+    margin-top: 2px;
+    color: var(--text-2);
+    max-width: 44ch;
+  }
+  .metric,
+  .sealed {
+    display: grid;
+    gap: 2px;
+  }
+  .mname {
+    color: var(--muted);
+    font-size: var(--fs-xs);
+  }
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .lock {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--live);
+  }
+  .c-year {
+    color: var(--text-2);
+  }
+  @media (max-width: 860px) {
+    thead {
+      display: none;
+    }
+    .runs,
+    tbody,
+    tr,
+    td,
+    tbody th {
+      display: block;
+    }
+    tbody tr {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--s2) var(--s3);
+      padding: var(--s4);
+      border-bottom: 1px solid var(--rule);
+    }
+    tbody tr:last-child {
+      border-bottom: 0;
+    }
+    td,
+    tbody th {
+      padding: 0;
+      border: 0;
+    }
+    .c-run {
+      grid-column: 1 / -1;
+    }
+    .c-metric,
+    .c-stack {
+      grid-column: 1 / -1;
+    }
+    .c-status {
+      grid-row: 2;
+    }
+    .c-year {
+      grid-row: 2;
+      text-align: right;
+    }
+  }
+</style>
+
+<style>
+  .runs tbody tr[hidden],
+  .table-wrap[hidden] {
+    display: none !important;
+  }
+</style>

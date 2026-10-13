@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.astro/
+.vercel/
+test-results/
+playwright-report/
+.DS_Store
+.review/
+
+# Private planning notes and local agent tooling (not part of the site)
+PROPUESTA-B.md
+.agents/
+.claude/
+skills-lock.json

@@ -1,0 +1,82 @@
+title: { en: Home Credit default risk, es: Home Credit default risk }
+status: running
+lenses: [ds, de, quant]
+lens_rank: { ds: 3, quant: 3, ai: 5, de: 1 }
+year: "2026"
+featured: true
+stack: [Python, scikit-learn, pandas, SciPy, LightGBM, imbalanced-learn, Parquet, pytest, GitHub Actions]
+summary:
+  en: End-to-end credit scoring pipeline on 31M rows, with modelling in progress and the holdout untouched.
+  es: Pipeline de credit scoring de punta a punta sobre 31M de filas, con el modelado en curso y el holdout sin tocar.
+problem:
+  en: Predict which loan applicants will default (8.07% default rate) from 307,511 applications and their credit history across bureau and internal tables.
+  es: Predecir qué solicitantes de crédito entrarán en impago (tasa del 8,07 %) a partir de 307.511 solicitudes y su historial en tablas de buró e internas.
+finding:
+  en: "Raw debt and credit amounts barely correlate with default (< 0.011), but their ratio has a rank-biserial of 0.18 and a monotonic gradient from 5.6% to 18.6% default. Owing a figure says little unless it is relative to the credit granted."
+  es: "La deuda y el crédito brutos apenas correlacionan con el impago (< 0,011), pero su cociente da un rank-biserial de 0,18 y un gradiente monótono del 5,6 % al 18,6 % de impago. Deber una cifra dice poco si no es relativa al crédito concedido."
+sealed:
+  reason:
+    en: "Model metrics stay hidden until the final holdout. The 61,499-client holdout is used exactly once, and a static test fails if any modelling module even names it."
+    es: "Las métricas del modelo se ocultan hasta el holdout final. El holdout de 61.499 clientes se usa una sola vez, y un test estático falla si algún módulo de modelado llega a nombrarlo."
+phase:
+  current: 4
+  total: 8
+  label: { en: Modelling, es: Modelado }
+headline_text: { en: "31M rows, memory −90%", es: "31M filas, memoria −90 %" }
+engineering:
+  - { label: { en: Rows processed, es: Filas procesadas }, value: "30,994,078" }
+  - { label: { en: Memory after optimisation, es: Memoria tras optimizar }, value: "4.9 GB → 0.5 GB (−90%)" }
+  - { label: { en: Final features, es: Features finales }, value: "163" }
+  - { label: { en: Automated tests, es: Tests automáticos }, value: "1,507" }
+  - { label: { en: Cross-validation folds, es: Folds de validación cruzada }, value: "15 (5 × 3 seeds)" }
+  - { label: { en: Holdout clients, es: Clientes en el holdout }, value: "61,499" }
+metrics:
+  - name: { en: Memory footprint, es: Memoria }
+    unit: GB
+    baseline: 4.9
+    value: 0.5
+    lower_is_better: true
+    decimals: 1
+    reported_pct: -90
+config:
+  data:
+    tables: [application_train, bureau, bureau_balance, previous_application]
+    rows: 30,994,078
+    clients: 307,511
+    default_rate: "8.07%"
+  features:
+    count: 163
+    selection: Information Value on the training clients only
+    recipes: YAML, exported from the EDA ranking
+  validation:
+    scheme: "5 folds × 3 seeds, feature pipeline refit in every fold"
+    model_comparison: "Nadeau-Bengio corrected t-test, Bonferroni"
+    holdout: "61,499 clients, used once"
+  imbalance: [class weights or resampling inside the pipeline, decision threshold, calibration]
+  models: [logistic regression (base), Random Forest, LightGBM]
+  engineering: "1,507 pytest tests, CI on every push and PR, Parquet via pyarrow"
+  next: [interpretability, REST API, Docker + MLflow, monitoring]
+decisions:
+  - title: { en: Statistics behind every EDA choice, es: Estadística detrás de cada decisión del EDA }
+    body:
+      en: "Every decision on nulls, outliers or aggregation is checked against the default rate with a test (Mann-Whitney U, z-test, chi-square / Cramér's V, Fisher) and an effect-size threshold with Bonferroni, not just a p-value."
+      es: "Cada decisión sobre nulos, outliers o agregación se contrasta con la tasa de impago mediante un test (Mann-Whitney U, z-test, chi² / V de Cramér, Fisher) y un umbral de tamaño del efecto con Bonferroni, no solo con el p-valor."
+  - title: { en: Do not fill missing history with zero, es: No rellenar con cero el historial ausente }
+    body:
+      en: "A default fillna(0) mixed 44,020 clients with no credit history (10.12% default) with clients whose count was truly zero. Separating them reversed the feature ranking."
+      es: "Un fillna(0) por defecto mezclaba a 44.020 clientes sin historial (10,12 % de impago) con los que de verdad tenían un conteo cero. Separarlos invirtió el ranking de variables."
+  - title: { en: Fix the business metric before measuring, es: Fijar la métrica de negocio antes de medir }
+    body:
+      en: "Accuracy and F1 were ruled out on purpose: approving everyone already scores 92%. The selection criterion was fixed before any model was trained."
+      es: "Accuracy y F1 se descartaron a propósito: aprobar a todo el mundo ya da un 92 %. El criterio de selección se fijó antes de entrenar ningún modelo."
+  - title: { en: Make memory a feature, es: La memoria también cuenta }
+    body:
+      en: Downcasting each numeric column to the smallest safe type (float16 excluded for amounts) and categorising text took the four tables from 4.9 GB to 0.5 GB in memory.
+      es: Reducir cada columna numérica al tipo más pequeño que no pierde rango (sin float16 en importes) y pasar los textos a categoría bajó las cuatro tablas de 4,9 GB a 0,5 GB en memoria.
+notes:
+  - en: "Synthetic oversampling (SMOTENC) was ruled out: it made all three models worse."
+    es: "El sobremuestreo sintético (SMOTENC) se descartó: empeoraba los tres modelos."
+  - en: Scope fixed at 4 of the 7 tables on purpose, to reach deployment rather than chase every join.
+    es: El alcance se fijó en 4 de las 7 tablas a propósito, para llegar al despliegue en vez de perseguir cada join.
+artifacts:
+  repo: https://github.com/yeraybc/home-credit-default-risk

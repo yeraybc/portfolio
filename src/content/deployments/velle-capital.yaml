@@ -1,0 +1,23 @@
+org: Velle Capital
+role: { en: Data Science Intern, es: Data Science Intern }
+live: true
+start: "2026-09-28"
+period: { en: "Sep 2026 – Jan 2027", es: "sep 2026 – ene 2027" }
+location: { en: Madrid, es: Madrid }
+order: 1
+lenses: [ds, ai, de, quant]
+lens_rank: { ds: 1, quant: 1, ai: 1, de: 1 }
+context:
+  en: An investment platform for distressed real-estate assets (NPLs and REOs) that uses data and AI to value assets at scale. I joined after the team saw my MadridDataHouse post.
+  es: Una plataforma de inversión en activos inmobiliarios distressed (NPLs y REOs) que usa datos e IA para valorar activos a escala. Me incorporé después de que el equipo viera mi post de MadridDataHouse.
+highlights:
+  - en: "Built an agent (Python, Claude Agent SDK) that standardises 40 client spreadsheets in 5 minutes instead of about an hour, with 98% field-level accuracy. In pilot."
+    es: "Construí un agente (Python, Claude Agent SDK) que homogeneiza 40 excels de clientes en 5 minutos en vez de cerca de una hora, con un 98 % de acierto por campo. En piloto."
+  - en: "Write PySpark pipelines and jobs in Databricks over data on AWS S3: 5+ catalogs, 15+ tables each, 2M+ records."
+    es: "Escribo pipelines y jobs de PySpark en Databricks sobre datos en AWS S3: más de 5 catálogos, más de 15 tablas cada uno y más de 2M de registros."
+  - en: Geo-referencing 250,000+ property listings whose exact address is often missing (in progress).
+    es: Georreferenciación de más de 250.000 anuncios inmobiliarios a los que a menudo les falta la dirección exacta (en curso).
+  - en: Cleared to lead my own projects after 5 working days, where the usual ramp-up is one month.
+    es: Visto bueno para llevar proyectos propios en 5 días laborables, cuando lo habitual es un mes.
+stack: [Python, PySpark, Databricks, AWS S3, SQL, Claude Agent SDK]
+related_runs: [data-ingestion-agent, geo-referencing, madrid-data-house]

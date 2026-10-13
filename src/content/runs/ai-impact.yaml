@@ -1,0 +1,24 @@
+title: { en: Will AI replace you?, es: ¿Serás reemplazado por IA? }
+status: archived
+lenses: [ds]
+lens_rank: { ds: 10, quant: 10, ai: 10, de: 11 }
+year: "2026"
+featured: false
+stack: [Python, scikit-learn]
+summary:
+  en: Multiclass classification of AI replacement risk on a synthetic dataset. An early learning project.
+  es: Clasificación multiclase del riesgo de reemplazo por IA sobre datos sintéticos. Proyecto de iniciación.
+problem:
+  en: Which variables explain whether a worker is replaced, changed or kept after their company adopts AI?
+  es: ¿Qué variables explican si un trabajador es reemplazado, modificado o mantenido tras la adopción de IA en su empresa?
+finding:
+  en: "Personal traits did not predict replacement; two structural variables carried 95% of the signal. Synthetic Kaggle data, so the figure does not transfer to real populations."
+  es: "Las variables personales no predecían el reemplazo; dos variables estructurales concentraban el 95 % de la señal. Datos sintéticos de Kaggle: la cifra no se extrapola a poblaciones reales."
+headline_text: { en: "Balanced accuracy 0.951", es: "Balanced accuracy 0,951" }
+config:
+  data: "2,000 employees, 17 variables (synthetic)"
+  models: [Logistic Regression, KNN, SVM, Random Forest, Gradient Boosting]
+  selected: "Logistic Regression (C = 0.01), chosen for parsimony"
+decisions: []
+artifacts:
+  repo: https://github.com/yeraybc/ai-impact-analysis

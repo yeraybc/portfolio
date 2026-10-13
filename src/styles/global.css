@@ -1,0 +1,376 @@
+/* Tokens. Dark ("plotter ink") is the default; light is engineering graph paper. */
+:root {
+  color-scheme: dark;
+  --bg: #0f1624;
+  --panel: #162033;
+  --panel-2: #1b2740;
+  --rule: #24314b;
+  --grid: rgb(120 150 200 / 0.06);
+  --grid-major: rgb(120 150 200 / 0.1);
+  --text: #e4e8f0;
+  --text-2: #aab3c5;
+  --muted: #8a93a6;
+  --live: #f0b44c;
+  --live-ink: #1a1203;
+  --good: #4fbf8f;
+  --bad: #e8685a;
+  --base: #7f8aa0;
+  --focus: #f0b44c;
+
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-cond: 'IBM Plex Sans Condensed', 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Type scale, ratio 1.25 on a 16px base. */
+  --fs-xs: 0.8rem;
+  --fs-sm: 0.875rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.5625rem;
+  --fs-2xl: 1.953rem;
+  --fs-3xl: 2.441rem;
+
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  --s8: 64px;
+
+  --radius: 6px;
+  --sidebar: 224px;
+  --measure: 70ch;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f6f8fb;
+  --panel: #ffffff;
+  --panel-2: #eef3f9;
+  --rule: #d9e3f0;
+  --grid: rgb(64 112 184 / 0.07);
+  --grid-major: rgb(64 112 184 / 0.13);
+  --text: #121a2b;
+  --text-2: #3d4a63;
+  --muted: #5d6880;
+  --live: #93590a;
+  --live-ink: #ffffff;
+  --good: #17784f;
+  --bad: #c2412d;
+  --base: #6b7487;
+  --focus: #93590a;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  /* Graph paper: 8px minor grid, 40px major grid. Only on the page background, never on panels. */
+  background-image:
+    linear-gradient(var(--grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 40px 40px, 40px 40px, 8px 8px, 8px 8px;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  line-height: 1.2;
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--fs-2xl);
+  letter-spacing: -0.01em;
+}
+h2 {
+  font-size: var(--fs-xl);
+}
+h3 {
+  font-size: var(--fs-lg);
+}
+
+p {
+  margin: 0;
+  max-width: var(--measure);
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  text-underline-offset: 3px;
+}
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+code,
+kbd,
+pre,
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--s4);
+  top: -100px;
+  z-index: 100;
+  padding: var(--s2) var(--s4);
+  background: var(--live);
+  color: var(--live-ink);
+  font-weight: 600;
+}
+.skip-link:focus {
+  top: var(--s4);
+}
+
+/* Panels: one surface, one radius. Hierarchy comes from type and spacing, not shadows. */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  min-height: 36px;
+  padding: 0 var(--s4);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+  font: 500 var(--fs-sm) / 1 var(--font-sans);
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn:hover {
+  border-color: var(--muted);
+}
+.btn-primary {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}
+.btn-primary:hover {
+  border-color: var(--text);
+  opacity: 0.9;
+}
+.btn-ghost {
+  background: transparent;
+}
+
+/* Delta: the sign and arrow always travel with the color, never color alone. */
+.delta {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+}
+.delta.better {
+  color: var(--good);
+}
+.delta.worse {
+  color: var(--bad);
+}
+.delta.same {
+  color: var(--muted);
+}
+
+/* Page scaffolding */
+.page-head {
+  display: grid;
+  gap: var(--s3);
+  margin-bottom: var(--s6);
+}
+.page-head p {
+  color: var(--text-2);
+  font-size: var(--fs-lg);
+  line-height: 1.45;
+}
+
+.section {
+  margin-top: var(--s7);
+}
+.section > h2 {
+  margin-bottom: var(--s4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Command palette */
+.cmdk {
+  width: min(560px, calc(100vw - 32px));
+  margin: 12vh auto auto;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+}
+.cmdk::backdrop {
+  background: rgb(5 9 16 / 0.6);
+}
+.cmdk-input {
+  width: 100%;
+  padding: var(--s4);
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-md);
+}
+.cmdk-input:focus {
+  outline: none;
+}
+.cmdk-list {
+  max-height: min(420px, 60vh);
+  overflow-y: auto;
+  padding: var(--s2);
+}
+.cmdk-group {
+  padding: var(--s2) var(--s3) var(--s1);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+.cmdk-item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding: var(--s2) var(--s3);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: var(--fs-sm);
+}
+.cmdk-item[aria-selected='true'] {
+  background: var(--panel-2);
+  box-shadow: inset 2px 0 0 var(--live);
+}
+.cmdk-hint {
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 55%;
+}
+.cmdk-empty {
+  padding: var(--s4) var(--s3);
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+}
+.cmdk-toast:empty {
+  display: none;
+}
+.cmdk-toast {
+  position: fixed;
+  bottom: var(--s5);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  padding: var(--s2) var(--s4);
+  border-radius: var(--radius);
+  background: var(--text);
+  color: var(--bg);
+  font-size: var(--fs-sm);
+}
+
+/* Print: the CV page prints as a clean A4 sheet; other pages print without chrome. */
+@page {
+  size: A4;
+  margin: 12mm 13mm;
+}
+@media print {
+  :root,
+  :root[data-theme] {
+    color-scheme: light;
+    --bg: #ffffff;
+    --panel: #ffffff;
+    --panel-2: #f2f4f8;
+    --rule: #c9d2df;
+    --text: #0d1320;
+    --text-2: #39465e;
+    --muted: #5d6880;
+    --live: #8a5308;
+    --good: #1a7a50;
+    --bad: #b23a28;
+    --base: #6b7487;
+  }
+  body {
+    background: #fff !important;
+  }
+  .sidebar,
+  .site-footer,
+  .skip-link,
+  .no-print,
+  .cmdk,
+  .cmdk-toast {
+    display: none !important;
+  }
+  .shell {
+    display: block !important;
+  }
+  main {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+}

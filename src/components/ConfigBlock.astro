@@ -1,0 +1,57 @@
+---
+import { toYamlLines } from '../lib/yaml';
+
+interface Props {
+  data: Record<string, unknown>;
+  label?: string;
+}
+const { data, label } = Astro.props;
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const html = toYamlLines(data)
+  .map((line) => line.map((tok) => `<span class="tk-${tok.kind}">${esc(tok.text)}</span>`).join(''))
+  .join('\n');
+---
+
+<figure class="config">
+  {label && <figcaption>{label}</figcaption>}
+  <pre tabindex="0"><code set:html={html} /></pre>
+</figure>
+
+<style>
+  .config {
+    margin: 0;
+  }
+  figcaption {
+    margin-bottom: var(--s2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--muted);
+  }
+  pre {
+    margin: 0;
+    padding: var(--s4) var(--s5);
+    overflow-x: auto;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    font-size: var(--fs-sm);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  :global(.tk-key) {
+    color: var(--text);
+    font-weight: 500;
+  }
+  :global(.tk-str) {
+    color: var(--text-2);
+  }
+  :global(.tk-num),
+  :global(.tk-bool) {
+    color: var(--live);
+  }
+  :global(.tk-punct),
+  :global(.tk-comment) {
+    color: var(--muted);
+  }
+</style>

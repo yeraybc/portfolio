@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import ConfigBlock from '../components/ConfigBlock.astro';
+import type { Locale } from '../i18n/ui';
+import { useT, localePath } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useT(locale);
+---
+
+<Base locale={locale} path="/404" title={t('nf.title')}>
+  <header class="page-head">
+    <p class="num muted">404</p>
+    <h1>{t('nf.title')}</h1>
+    <p>{t('nf.body')}</p>
+  </header>
+  <ConfigBlock data={{ status: 'not_found', checked: ['/runs', '/compare', '/deployments'], suggestion: localePath('/runs', locale) }} label="error.yaml" />
+  <p class="section">
+    <a class="btn btn-primary" href={localePath('/runs', locale)} data-internal>{t('cta.allRuns')}</a>
+  </p>
+</Base>

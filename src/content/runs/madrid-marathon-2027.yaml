@@ -1,0 +1,24 @@
+title: { en: madrid-marathon-2027, es: madrid-marathon-2027 }
+status: training
+lenses: [ds, quant, ai, de]
+lens_rank: { ds: 99, quant: 99, ai: 99, de: 99 }
+year: "2027"
+featured: false
+hidden: true
+stack: [legs, coffee]
+summary:
+  en: First marathon, Madrid, April 2027. Target under 3h15.
+  es: Primera maratón, Madrid, abril de 2027. Objetivo por debajo de 3h15.
+problem:
+  en: Turn a first half marathon into a first full marathon without blowing up after 30 km.
+  es: Pasar de una primera media maratón a una primera maratón sin reventar después del km 30.
+baseline_label: { en: "Half marathon, Carabanchel 2026", es: "Media maratón, Carabanchel 2026" }
+headline_text: { en: "target < 3h15", es: "objetivo < 3h15" }
+config:
+  run: madrid-marathon-2027
+  status: training
+  baseline: "half-marathon-carabanchel-2026  # ~1h50 (target was 2h)"
+  target: "< 3h15"
+  eval_date: "2027-04"
+decisions: []
+artifacts: {}

@@ -1,0 +1,54 @@
+---
+import type { Locale, L } from '../../i18n/ui';
+import { tr, useT } from '../../i18n/utils';
+
+interface Props {
+  locale: Locale;
+  phase: { current: number; total: number; label: L };
+}
+const { locale, phase } = Astro.props;
+const t = useT(locale);
+const segs = Array.from({ length: phase.total }, (_, i) => i + 1);
+---
+
+<div class="phase">
+  <p class="txt">
+    <span class="num">{t('run.phase')} {phase.current}/{phase.total}</span>
+    <span>{tr(phase.label, locale)}</span>
+  </p>
+  <div class="segs" role="img" aria-label={`${t('run.phase')} ${phase.current} / ${phase.total}: ${tr(phase.label, locale)}`}>
+    {segs.map((s) => <span class={s < phase.current ? 'done' : s === phase.current ? 'now' : 'todo'} />)}
+  </div>
+</div>
+
+<style>
+  .phase {
+    display: grid;
+    gap: var(--s2);
+  }
+  .txt {
+    display: flex;
+    gap: var(--s3);
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+  }
+  .segs {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+    max-width: 360px;
+  }
+  .segs span {
+    height: 8px;
+    border-radius: 2px;
+  }
+  .done {
+    background: var(--text-2);
+  }
+  .now {
+    background: var(--live);
+  }
+  .todo {
+    background: var(--rule);
+  }
+</style>

@@ -1,0 +1,196 @@
+---
+import { readFileSync } from 'node:fs';
+import type { Locale } from '../i18n/ui';
+import { useT, localePath } from '../i18n/utils';
+import { fmtNum } from '../lib/format';
+import { LIVE_RUN } from '../lib/live-run-config';
+import { liveRunSvg, heightFor } from '../lib/live-run-svg';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = useT(locale);
+const data = JSON.parse(readFileSync(new URL('../../public/data/live-run.json', import.meta.url), 'utf8'));
+const curve: number[] = data.curve;
+const ols: number = data.meta.ols_val_rmse;
+
+const fmt = (v: number) => fmtNum(v, locale, 0);
+const geom = {
+  epochs: LIVE_RUN.epochs,
+  ols,
+  yMax: Math.ceil((Math.max(curve[0], ols) + 40) / 100) * 100,
+  yMin: Math.floor((Math.min(...curve) - 40) / 100) * 100,
+};
+const final = curve.at(-1)!;
+const firstBeat = curve.findIndex((v) => v < ols) + 1;
+const W = 640;
+const svg = liveRunSvg(geom, W, curve, { epoch: t('live.epoch'), baseline: t('live.baseline'), fmt }, curve);
+const config = { ...geom, curve, url: '/data/live-run.json' };
+---
+
+<section class="live panel" aria-labelledby="live-title" data-live-run data-config={JSON.stringify(config)} data-strings={JSON.stringify({ training: t('live.training'), beats: t('live.beats'), epoch: t('live.epoch'), baseline: t('live.baseline'), firstBeat })}>
+  <header class="live-head">
+    <div>
+      <h2 id="live-title">{t('live.title')}</h2>
+      <p class="sub">{t('live.subtitle')}</p>
+    </div>
+    <div class="readout" aria-hidden="true">
+      <div><span class="k">{t('live.epoch')}</span><span class="v num" data-epoch>{LIVE_RUN.epochs}</span></div>
+      <div><span class="k">RMSE</span><span class="v num" data-val>{fmt(final)}</span></div>
+      <div><span class="k">{t('live.baseline')}</span><span class="v num base">{fmt(ols)}</span></div>
+    </div>
+  </header>
+
+  <div class="chart-box">
+  <svg viewBox={`0 0 ${W} ${heightFor(W)}`} width={W} height={heightFor(W)} class="chart" role="img" aria-label={`${t('live.metric')}. ${t('live.baseline')} ${fmt(ols)}. ${t('run.final')} ${fmt(final)}.`} set:html={svg} data-chart />
+  </div>
+
+  <footer class="live-foot">
+    <p class="state" data-state>
+      <span class="pill done" data-pill><span aria-hidden="true">✓</span> {t('live.beats')}</span>
+      <span class="muted static-note">{t('live.static')}</span>
+    </p>
+    <button class="btn" type="button" data-restart hidden>{t('live.restart')}</button>
+  </footer>
+  <p class="note">
+    {t('live.note')} <a href={localePath('/runs/madrid-data-house', locale)} data-internal>{t('live.open')}</a>
+  </p>
+  <p class="visually-hidden" aria-live="polite" data-announce></p>
+</section>
+
+<script>
+  import { initLiveRun } from '../lib/live-run-client';
+  document.querySelectorAll<HTMLElement>('[data-live-run]').forEach(initLiveRun);
+</script>
+
+<style>
+  .live {
+    padding: var(--s5);
+    display: grid;
+    gap: var(--s4);
+  }
+  .live-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--s4);
+  }
+  h2 {
+    font-size: var(--fs-lg);
+  }
+  .sub {
+    margin-top: 4px;
+    color: var(--text-2);
+    font-size: var(--fs-sm);
+  }
+  .readout {
+    display: flex;
+    gap: var(--s5);
+  }
+  .readout div {
+    display: grid;
+    gap: 2px;
+  }
+  .k {
+    font-size: var(--fs-xs);
+    color: var(--muted);
+  }
+  .v {
+    font-size: var(--fs-lg);
+    min-width: 4ch;
+  }
+  .v.base {
+    color: var(--text-2);
+  }
+  /* Fixed height (same rule as heightFor) so the client redraw never shifts the layout. */
+  .chart-box {
+    container-type: inline-size;
+  }
+  .chart {
+    display: block;
+    width: 100%;
+    height: 240px;
+    touch-action: pan-y;
+  }
+  @container (max-width: 479px) {
+    .chart {
+      height: 200px;
+    }
+  }
+  .chart :global(.grid) {
+    stroke: var(--rule);
+    stroke-width: 1;
+  }
+  .chart :global(.tick) {
+    font: 11px var(--font-mono);
+    fill: var(--muted);
+  }
+  .chart :global(.ols) {
+    stroke: var(--base);
+    stroke-width: 1.5;
+  }
+  .chart :global(.ols-lbl) {
+    font: 11px var(--font-sans);
+    fill: var(--text-2);
+  }
+  .chart :global(.curve) {
+    fill: none;
+    stroke: var(--live);
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .chart :global(.head) {
+    fill: var(--live);
+    stroke: var(--panel);
+    stroke-width: 2;
+  }
+  .chart :global(.cross) {
+    stroke: var(--muted);
+    stroke-width: 1;
+  }
+  .chart :global(.hover-lbl) {
+    font: 11px var(--font-mono);
+    fill: var(--text);
+  }
+  /* With JS and motion allowed, the live path replaces the static one (no flash before JS runs). */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js) .live:not([data-static]) :global(.curve-static) {
+      visibility: hidden;
+    }
+  }
+  .live-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s3);
+  }
+  .state {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s3);
+    font-size: var(--fs-sm);
+  }
+  .pill {
+    display: inline-flex;
+    gap: 6px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+  }
+  .pill.done {
+    color: var(--good);
+  }
+  .pill.training {
+    color: var(--live);
+  }
+  .note {
+    font-size: var(--fs-xs);
+    color: var(--muted);
+  }
+</style>

@@ -1,0 +1,446 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import StatusBadge from '../components/StatusBadge.astro';
+import Stack from '../components/Stack.astro';
+import ConfigBlock from '../components/ConfigBlock.astro';
+import MetricBars from '../components/charts/MetricBars.astro';
+import Leaderboard from '../components/charts/Leaderboard.astro';
+import PhaseBar from '../components/charts/PhaseBar.astro';
+import PairBars from '../components/charts/PairBars.astro';
+import Delta from '../components/Delta.astro';
+import type { Locale } from '../i18n/ui';
+import { useT, tr, localePath } from '../i18n/utils';
+import { fmtNum, fmtBaseline, withUnit } from '../lib/format';
+
+interface Props {
+  locale: Locale;
+  run: CollectionEntry<'runs'>;
+}
+const { locale, run } = Astro.props;
+const d = run.data;
+const t = useT(locale);
+const title = tr(d.title, locale);
+const baselineLabel = d.baseline_label ? tr(d.baseline_label, locale) : undefined;
+const m = d.headline_metric;
+
+const artifacts = [
+  d.artifacts.app && { href: d.artifacts.app, label: t('art.app') },
+  d.artifacts.repo && { href: d.artifacts.repo, label: t('art.repo') },
+  d.artifacts.paper && { href: d.artifacts.paper, label: t('art.paper') },
+  d.artifacts.linkedin && { href: d.artifacts.linkedin, label: t('art.linkedin') },
+].filter(Boolean) as { href: string; label: string }[];
+
+const hasMetrics = d.metrics.length > 0 || d.leaderboard || d.comparison || d.sealed || d.engineering.length > 0;
+const tabs = [
+  { id: 'overview', label: t('run.tab.overview') },
+  { id: 'config', label: t('run.tab.config') },
+  hasMetrics && { id: 'metrics', label: t('run.tab.metrics') },
+  d.decisions.length > 0 && { id: 'decisions', label: t('run.tab.decisions') },
+  { id: 'artifacts', label: t('run.tab.artifacts') },
+  d.notes.length > 0 && { id: 'notes', label: t('run.tab.notes') },
+].filter(Boolean) as { id: string; label: string }[];
+---
+
+<Base locale={locale} path={`/runs/${run.id}`} title={title} description={tr(d.summary, locale)}>
+  <article class="run">
+    <header class="run-head">
+      <a class="back" href={localePath('/runs', locale)} data-internal>{t('run.back')}</a>
+      <div class="meta">
+        <StatusBadge status={d.status} locale={locale} />
+        <span class="num muted">{d.year}</span>
+      </div>
+      <h1>{title}</h1>
+      <p class="lede">{tr(d.summary, locale)}</p>
+      {
+        m && !d.sealed && (
+          <p class="headline">
+            <span class="hk">{tr(m.name, locale)}</span>
+            <span class="num base">{baselineLabel} {withUnit(fmtBaseline(m, locale), m.unit)}</span>
+            <span aria-hidden="true" class="arrow">→</span>
+            <span class="num final">{withUnit(fmtNum(m.value, locale, m.decimals), m.unit)}</span>
+            <Delta metric={m} locale={locale} />
+          </p>
+        )
+      }
+      {d.phase && <PhaseBar locale={locale} phase={d.phase} />}
+      <Stack items={d.stack} />
+    </header>
+
+    <div class="tabs" role="tablist" aria-label={title} hidden data-tablist>
+      {
+        tabs.map((tab, i) => (
+          <button role="tab" type="button" id={`tab-${tab.id}`} aria-controls={tab.id} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>
+            {tab.label}
+          </button>
+        ))
+      }
+    </div>
+
+    <section id="overview" class="tab-panel" role="tabpanel" aria-labelledby="tab-overview">
+      <h2 class="panel-title">{t('run.tab.overview')}</h2>
+      <div class="prose">
+        <h3>{t('run.problem')}</h3>
+        <p>{tr(d.problem, locale)}</p>
+        {
+          d.finding && (
+            <>
+              <h3>{t('run.finding')}</h3>
+              <p>{tr(d.finding, locale)}</p>
+            </>
+          )
+        }
+        {
+          d.business && (
+            <>
+              <h3>{t('run.business')}</h3>
+              <p>{tr(d.business, locale)}</p>
+            </>
+          )
+        }
+      </div>
+      {
+        d.sealed && (
+          <div class="sealed">
+            <p class="sealed-title num">
+              <svg width="14" height="14" viewBox="0 0 12 12" aria-hidden="true">
+                <rect x="2" y="5" width="8" height="6" rx="1" fill="currentColor" />
+                <path d="M4 5V3.5a2 2 0 0 1 4 0V5" fill="none" stroke="currentColor" stroke-width="1.3" />
+              </svg>
+              {t('run.sealed')}
+            </p>
+            <p>{tr(d.sealed.reason, locale)}</p>
+          </div>
+        )
+      }
+      {
+        d.generated_deployment && (
+          <p class="generated">
+            <span class="live-dot" aria-hidden="true">●</span> {t('run.generated')}:{' '}
+            <a href={localePath('/deployments', locale)} data-internal>
+              Velle Capital
+            </a>
+          </p>
+        )
+      }
+    </section>
+
+    <section id="config" class="tab-panel" role="tabpanel" aria-labelledby="tab-config">
+      <h2 class="panel-title">{t('run.tab.config')}</h2>
+      <ConfigBlock data={d.config} label={`${run.id}.yaml`} />
+    </section>
+
+    {
+      hasMetrics && (
+        <section id="metrics" class="tab-panel" role="tabpanel" aria-labelledby="tab-metrics">
+          <h2 class="panel-title">{t('run.tab.metrics')}</h2>
+          {d.leaderboard && <Leaderboard locale={locale} board={d.leaderboard} />}
+          {d.comparison && <PairBars locale={locale} data={d.comparison} />}
+          {d.metrics.length > 0 && (
+            <div class="metric-grid">
+              {d.metrics.map((metric) => (
+                <MetricBars locale={locale} metric={metric} baselineLabel={baselineLabel} />
+              ))}
+            </div>
+          )}
+          {d.engineering.length > 0 && (
+            <dl class="eng panel">
+              {d.engineering.map((e) => (
+                <div>
+                  <dt>{tr(e.label, locale)}</dt>
+                  <dd class="num">{e.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+          {d.sealed && (
+            <div class="sealed">
+              <p class="sealed-title num">{locale === 'es' ? 'Métricas del modelo' : 'Model metrics'}: {t('run.sealed').toLowerCase()}</p>
+              <p>{tr(d.sealed.reason, locale)}</p>
+            </div>
+          )}
+        </section>
+      )
+    }
+
+    {
+      d.decisions.length > 0 && (
+        <section id="decisions" class="tab-panel" role="tabpanel" aria-labelledby="tab-decisions">
+          <h2 class="panel-title">{t('run.tab.decisions')}</h2>
+          <div class="decisions">
+            {d.decisions.map((dec) => (
+              <div class="decision">
+                <h3>{tr(dec.title, locale)}</h3>
+                <p>{tr(dec.body, locale)}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    <section id="artifacts" class="tab-panel" role="tabpanel" aria-labelledby="tab-artifacts">
+      <h2 class="panel-title">{t('run.tab.artifacts')}</h2>
+      {
+        artifacts.length ? (
+          <ul class="artifacts">
+            {artifacts.map((a) => (
+              <li>
+                <a class="btn" href={a.href} rel="noopener">
+                  {a.label}
+                </a>
+                <span class="num muted">{a.href.replace(/^https:\/\/(www\.)?/, '').replace(/\/$/, '').slice(0, 48)}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="muted">{t('art.none')}</p>
+        )
+      }
+      <p class="compare-link">
+        <a href={`${localePath('/compare', locale)}?a=${run.id}`} data-internal>{t('run.compareWith')}</a>
+      </p>
+    </section>
+
+    {
+      d.notes.length > 0 && (
+        <section id="notes" class="tab-panel" role="tabpanel" aria-labelledby="tab-notes">
+          <h2 class="panel-title">{t('run.tab.notes')}</h2>
+          <p class="muted">{t('run.notesLede')}</p>
+          <ul class="notes">
+            {d.notes.map((n) => (
+              <li>{tr(n, locale)}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </article>
+</Base>
+
+<script>
+  // Progressive tabs: without JS every section is visible in order.
+  const list = document.querySelector<HTMLElement>('[data-tablist]');
+  if (list) {
+    const tabs = Array.from(list.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const panels = tabs.map((t) => document.getElementById(t.getAttribute('aria-controls')!)!);
+    list.hidden = false;
+    document.documentElement.classList.add('tabs-on');
+    const select = (i: number, focus = false, push = true) => {
+      tabs.forEach((t, j) => {
+        t.setAttribute('aria-selected', String(i === j));
+        t.tabIndex = i === j ? 0 : -1;
+        panels[j].hidden = i !== j;
+      });
+      if (focus) tabs[i].focus();
+      if (push) history.replaceState(history.state, '', `${location.pathname}${location.search}#${panels[i].id}`);
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(i));
+      t.addEventListener('keydown', (e) => {
+        const k = e.key;
+        if (k === 'ArrowRight' || k === 'ArrowLeft' || k === 'Home' || k === 'End') {
+          e.preventDefault();
+          const n = k === 'Home' ? 0 : k === 'End' ? tabs.length - 1 : (i + (k === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+          select(n, true);
+        }
+      });
+    });
+    const fromHash = panels.findIndex((p) => `#${p.id}` === location.hash);
+    select(fromHash >= 0 ? fromHash : 0, false, false);
+  }
+</script>
+
+<style>
+  .run-head {
+    display: grid;
+    gap: var(--s3);
+    margin-bottom: var(--s6);
+  }
+  .back {
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+  }
+  .meta {
+    display: flex;
+    gap: var(--s4);
+    align-items: baseline;
+    font-size: var(--fs-xs);
+  }
+  h1 {
+    font-family: var(--font-cond);
+    font-size: clamp(1.953rem, 4vw, 2.441rem);
+    letter-spacing: -0.015em;
+  }
+  .lede {
+    font-size: var(--fs-lg);
+    color: var(--text-2);
+  }
+  .headline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--s2) var(--s3);
+    margin-top: var(--s2);
+    max-width: none;
+  }
+  .hk {
+    font-size: var(--fs-sm);
+    color: var(--muted);
+  }
+  .headline .base {
+    color: var(--text-2);
+  }
+  .headline .final {
+    font-size: var(--fs-xl);
+    font-weight: 500;
+  }
+  .arrow {
+    color: var(--muted);
+  }
+  .tabs {
+    display: flex;
+    gap: var(--s1);
+    margin-bottom: var(--s5);
+    border-bottom: 1px solid var(--rule);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs[hidden] {
+    display: none;
+  }
+  [role='tab'] {
+    flex: none;
+    padding: var(--s2) var(--s3);
+    border: 0;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    background: none;
+    color: var(--text-2);
+    font: 500 var(--fs-sm) var(--font-sans);
+    cursor: pointer;
+  }
+  [role='tab'][aria-selected='true'] {
+    color: var(--text);
+    border-bottom-color: var(--live);
+  }
+  .tab-panel {
+    display: grid;
+    gap: var(--s4);
+    margin-bottom: var(--s7);
+  }
+  .tab-panel[hidden] {
+    display: none;
+  }
+  :global(html.tabs-on) .panel-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .prose {
+    display: grid;
+    gap: var(--s2);
+  }
+  .prose h3 {
+    margin-top: var(--s3);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .prose h3:first-child {
+    margin-top: 0;
+  }
+  .sealed {
+    padding: var(--s4) var(--s5);
+    border: 1px dashed var(--live);
+    border-radius: var(--radius);
+    display: grid;
+    gap: var(--s2);
+    max-width: 72ch;
+  }
+  .sealed-title {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    color: var(--live);
+    font-size: var(--fs-sm);
+  }
+  .generated {
+    font-size: var(--fs-sm);
+  }
+  .live-dot {
+    color: var(--live);
+  }
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--s4);
+  }
+  .eng {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    margin: 0;
+  }
+  .eng div {
+    display: grid;
+    gap: 2px;
+    padding: var(--s4) var(--s5);
+    border-bottom: 1px solid var(--rule);
+  }
+  .eng dt {
+    font-size: var(--fs-xs);
+    color: var(--text-2);
+  }
+  .eng dd {
+    margin: 0;
+    font-size: var(--fs-md);
+  }
+  .decisions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--s5) var(--s6);
+  }
+  .decision {
+    display: grid;
+    gap: var(--s2);
+    align-content: start;
+    padding-top: var(--s3);
+    border-top: 2px solid var(--rule);
+  }
+  .decision h3 {
+    font-size: var(--fs-md);
+  }
+  .decision p {
+    color: var(--text-2);
+    font-size: var(--fs-sm);
+  }
+  .artifacts {
+    display: grid;
+    gap: var(--s3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .artifacts li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s3);
+  }
+  .artifacts .muted {
+    font-size: var(--fs-xs);
+    overflow-wrap: anywhere;
+  }
+  .compare-link {
+    font-size: var(--fs-sm);
+  }
+  .notes {
+    margin: 0;
+    padding-left: 1.1em;
+    display: grid;
+    gap: var(--s2);
+    max-width: 72ch;
+  }
+</style>

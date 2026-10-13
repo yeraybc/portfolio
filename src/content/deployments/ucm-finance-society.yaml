@@ -1,0 +1,20 @@
+org: UCM Finance Society
+role: { en: Quantitative Research Analyst, es: Quantitative Research Analyst }
+live: false
+start: "2025-09-01"
+end: "2026-09-30"
+period: { en: "Sep 2025 – Sep 2026", es: "sep 2025 – sep 2026" }
+location: { en: "Madrid, remote", es: "Madrid, en remoto" }
+order: 3
+lenses: [quant]
+lens_rank: { ds: 3, quant: 3, ai: 2, de: 2 }
+context:
+  en: A quantitative research sub-team whose work fed directly into Arcanix Fund's commodity analysis through a formal collaboration.
+  es: Un subequipo de investigación cuantitativa cuyo trabajo alimentaba directamente el análisis de materias primas de Arcanix Fund mediante una colaboración formal.
+highlights:
+  - en: "Usually led the analysis of whether an asset was worth investing in: time-series models, stochastic processes and econometrics on real market data."
+    es: "Solía liderar el análisis de si merecía la pena invertir en un activo: series temporales, procesos estocásticos y econometría sobre datos reales de mercado."
+  - en: Delegated tasks and trained new members of the sub-team in the full process.
+    es: Delegaba tareas y formaba a los nuevos miembros del subequipo en todo el proceso.
+stack: [Python, statsmodels, Git]
+related_runs: [btc-nasdaq-fed]

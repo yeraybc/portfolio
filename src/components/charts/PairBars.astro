@@ -1,0 +1,83 @@
+---
+// Two values on a 0–1 scale, e.g. correlation in levels vs returns.
+import type { Locale, L } from '../../i18n/ui';
+import { tr } from '../../i18n/utils';
+import { fmtNum } from '../../lib/format';
+
+interface Props {
+  locale: Locale;
+  data: { title: L; rows: { label: L; value: number }[]; note: L };
+}
+const { locale, data } = Astro.props;
+---
+
+<figure class="pb panel">
+  <figcaption>{tr(data.title, locale)}</figcaption>
+  <div class="rows">
+    {
+      data.rows.map((r, i) => (
+        <div class="row">
+          <span class="lbl">{tr(r.label, locale)}</span>
+          <span class="track">
+            <span class={`bar ${i === 0 ? 'spur' : 'real'}`} style={`width:${r.value * 100}%`} />
+          </span>
+          <span class="num val">{fmtNum(r.value, locale, 2)}</span>
+        </div>
+      ))
+    }
+  </div>
+  <p class="note">{tr(data.note, locale)}</p>
+</figure>
+
+<style>
+  .pb {
+    margin: 0;
+    padding: var(--s4) var(--s5);
+  }
+  figcaption {
+    margin-bottom: var(--s3);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+  }
+  .rows {
+    display: grid;
+    gap: var(--s2);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: minmax(120px, 30%) 1fr 5ch;
+    align-items: center;
+    gap: var(--s3);
+    font-size: var(--fs-sm);
+  }
+  .lbl {
+    color: var(--text-2);
+  }
+  .track {
+    position: relative;
+    height: 12px;
+    background: var(--panel-2);
+    border-radius: 2px;
+  }
+  .bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .spur {
+    background: var(--base);
+  }
+  .real {
+    background: var(--text-2);
+  }
+  .val {
+    text-align: right;
+  }
+  .note {
+    margin-top: var(--s3);
+    font-size: var(--fs-xs);
+    color: var(--muted);
+  }
+</style>

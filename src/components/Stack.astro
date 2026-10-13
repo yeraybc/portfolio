@@ -1,0 +1,43 @@
+---
+interface Props {
+  items: string[];
+  max?: number;
+}
+const { items, max } = Astro.props;
+const shown = max ? items.slice(0, max) : items;
+const rest = max ? items.length - shown.length : 0;
+---
+
+<ul class="stack">
+  {shown.map((s) => <li data-tool={s}>{s}</li>)}
+  {rest > 0 && <li class="more">+{rest}</li>}
+</ul>
+
+<style>
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+  }
+  li {
+    position: relative;
+  }
+  li:not(:last-child)::after {
+    content: '';
+  }
+  li:global(.hl) {
+    color: var(--text);
+    text-decoration: underline;
+    text-decoration-color: var(--live);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+  .more {
+    color: var(--muted);
+  }
+</style>
