@@ -2,9 +2,9 @@
 import { readFileSync } from 'node:fs';
 import type { Locale } from '../i18n/ui';
 import { useT, localePath } from '../i18n/utils';
-import { fmtNum } from '../lib/format';
-import { LIVE_RUN } from '../lib/live-run-config';
-import { liveRunSvg, heightFor } from '../lib/live-run-svg';
+import { fmtNum, fmtPct } from '../lib/format';
+import { LIVE_RUN, FEATURE_SET_KEYS, HIDDEN_OPTIONS, LR_OPTIONS, DEFAULT_RUN, type FeatureSet } from '../lib/live-run-config';
+import { liveRunSvg, heightFor, yRange } from '../lib/live-run-svg';
 
 interface Props {
   locale: Locale;
@@ -16,20 +16,31 @@ const curve: number[] = data.curve;
 const ols: number = data.meta.ols_val_rmse;
 
 const fmt = (v: number) => fmtNum(v, locale, 0);
-const geom = {
-  epochs: LIVE_RUN.epochs,
-  ols,
-  yMax: Math.ceil((Math.max(curve[0], ols) + 40) / 100) * 100,
-  yMin: Math.floor((Math.min(...curve) - 40) / 100) * 100,
-};
+const fmtLr = (v: number) => new Intl.NumberFormat(locale === 'es' ? 'es-ES' : 'en-GB', { maximumSignificantDigits: 2 }).format(v);
+const geom = { epochs: LIVE_RUN.epochs, ols, ...yRange([...curve, ols]) };
 const final = curve.at(-1)!;
 const firstBeat = curve.findIndex((v) => v < ols) + 1;
 const W = 640;
 const svg = liveRunSvg(geom, W, curve, { epoch: t('live.epoch'), baseline: t('live.baseline'), fmt }, curve);
-const config = { ...geom, curve, url: '/data/live-run.json' };
+const config = { ...geom, curve, url: '/data/live-run.json', run: DEFAULT_RUN };
+const setLabel: Record<FeatureSet, string> = {
+  all: t('live.set.all'),
+  no_lag: t('live.set.no_lag'),
+  location: t('live.set.location'),
+  house: t('live.set.house'),
+};
+const strings = {
+  training: t('live.training'),
+  beats: t('live.beats'),
+  miss: t('live.miss'),
+  epoch: t('live.epoch'),
+  baseline: t('live.baseline'),
+  firstBeat,
+};
+const pct = ((final - ols) / ols) * 100;
 ---
 
-<section class="live panel" aria-labelledby="live-title" data-live-run data-config={JSON.stringify(config)} data-strings={JSON.stringify({ training: t('live.training'), beats: t('live.beats'), epoch: t('live.epoch'), baseline: t('live.baseline'), firstBeat })}>
+<section class="live panel" aria-labelledby="live-title" data-live-run data-config={JSON.stringify(config)} data-strings={JSON.stringify(strings)}>
   <header class="live-head">
     <div>
       <h2 id="live-title">{t('live.title')}</h2>
@@ -38,7 +49,7 @@ const config = { ...geom, curve, url: '/data/live-run.json' };
     <div class="readout" aria-hidden="true">
       <div><span class="k">{t('live.epoch')}</span><span class="v num" data-epoch>{LIVE_RUN.epochs}</span></div>
       <div><span class="k">RMSE</span><span class="v num" data-val>{fmt(final)}</span></div>
-      <div><span class="k">{t('live.baseline')}</span><span class="v num base">{fmt(ols)}</span></div>
+      <div><span class="k">{t('live.baseline')}</span><span class="v num base" data-base>{fmt(ols)}</span></div>
     </div>
   </header>
 
@@ -51,8 +62,54 @@ const config = { ...geom, curve, url: '/data/live-run.json' };
       <span class="pill done" data-pill><span aria-hidden="true">✓</span> {t('live.beats')}</span>
       <span class="muted static-note">{t('live.static')}</span>
     </p>
-    <button class="btn" type="button" data-restart hidden>{t('live.restart')}</button>
   </footer>
+
+  <form class="controls" data-controls>
+    <fieldset>
+      <legend>{t('live.controls')}</legend>
+      <label>
+        <span>{t('live.features')}</span>
+        <select name="set">{FEATURE_SET_KEYS.map((k) => <option value={k} selected={k === DEFAULT_RUN.set}>{setLabel[k]}</option>)}</select>
+      </label>
+      <label>
+        <span>{t('live.hidden')}</span>
+        <select name="hidden">{HIDDEN_OPTIONS.map((h) => <option value={h} selected={h === DEFAULT_RUN.hidden}>{h}</option>)}</select>
+      </label>
+      <label>
+        <span>{t('live.lr')}</span>
+        <select name="lr">{LR_OPTIONS.map((lr) => <option value={lr} selected={lr === DEFAULT_RUN.lr}>{fmtLr(lr)}</option>)}</select>
+      </label>
+      <button class="btn btn-primary" type="submit">{t('live.train')}</button>
+    </fieldset>
+    <p class="hint">{t('live.hint')}</p>
+  </form>
+
+  <div class="table-wrap">
+    <table class="exp">
+      <caption class="visually-hidden">{t('live.runs')}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{t('live.features')}</th>
+          <th scope="col" class="n hp">{t('live.col.hidden')}</th>
+          <th scope="col" class="n hp">LR</th>
+          <th scope="col" class="n">OLS</th>
+          <th scope="col" class="n">MLP</th>
+          <th scope="col" class="n">{t('live.col.delta')}</th>
+        </tr>
+      </thead>
+      <tbody data-exp>
+        <tr class="current">
+          <th scope="row">{setLabel[DEFAULT_RUN.set]}</th>
+          <td class="n num hp">{DEFAULT_RUN.hidden}</td>
+          <td class="n num hp">{fmtLr(DEFAULT_RUN.lr)}</td>
+          <td class="n num">{fmt(ols)}</td>
+          <td class="n num">{fmt(final)}</td>
+          <td class="n num"><span class={`delta ${pct < 0 ? 'better' : 'worse'}`}>{fmtPct(pct, locale)}</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
   <p class="note">
     {t('live.note')} <a href={localePath('/runs/madrid-data-house', locale)} data-internal>{t('live.open')}</a>
   </p>
@@ -192,5 +249,99 @@ const config = { ...geom, curve, url: '/data/live-run.json' };
   .note {
     font-size: var(--fs-xs);
     color: var(--muted);
+  }
+  .pill.miss {
+    color: var(--bad);
+  }
+  .chart :global(.curve-prev) {
+    stroke: var(--base);
+    stroke-width: 1.25;
+    opacity: 0.55;
+  }
+  /* The controls need JS; html.js is set before paint, so showing them never shifts the layout. */
+  .controls {
+    display: none;
+    gap: var(--s3);
+  }
+  :global(html.js) .controls {
+    display: grid;
+  }
+  fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: var(--s3) var(--s4);
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  legend {
+    width: 100%;
+    margin-bottom: var(--s2);
+    padding: 0;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+  }
+  label {
+    display: grid;
+    gap: 4px;
+    font-size: var(--fs-xs);
+    color: var(--muted);
+  }
+  select {
+    min-height: 36px;
+    padding: 0 var(--s3);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: var(--panel-2);
+    color: var(--text);
+    font: inherit;
+    font-size: var(--fs-sm);
+  }
+  .hint {
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+  }
+  .table-wrap {
+    overflow-x: auto;
+  }
+  .exp {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-sm);
+  }
+  .exp th,
+  .exp td {
+    padding: 6px var(--s3);
+    border-top: 1px solid var(--rule);
+    text-align: left;
+    white-space: nowrap;
+  }
+  .exp thead th {
+    border-top: 0;
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .exp tbody th {
+    font-weight: 400;
+  }
+  .exp .n {
+    text-align: right;
+  }
+  .exp tr.current th {
+    box-shadow: inset 2px 0 0 var(--live);
+  }
+  .exp tbody tr:not(.current) {
+    color: var(--text-2);
+  }
+  /* On phones the hyper-parameters stay in the selects; the table keeps the comparison. */
+  @media (max-width: 560px) {
+    .exp .hp {
+      display: none;
+    }
+    .exp tbody th {
+      white-space: normal;
+    }
   }
 </style>

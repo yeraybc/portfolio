@@ -3,7 +3,7 @@
 // Usage: node scripts/build-live-run-data.ts [path/to/Data_Housing_Madrid.csv]
 import { readFileSync, writeFileSync } from 'node:fs';
 import { Mlp, fitOls, mulberry32, rmse } from '../src/lib/mlp.ts';
-import { LIVE_RUN } from '../src/lib/live-run-config.ts';
+import { FEATURES, LIVE_RUN } from '../src/lib/live-run-config.ts';
 
 const csvPath = process.argv[2] ?? '../MadridDataHouse/data/raw/Data_Housing_Madrid.csv';
 const N_TOTAL = 2000;
@@ -47,7 +47,8 @@ function lag(h: House): number {
   return d.reduce((s, x) => s + x.p, 0) / K;
 }
 
-const featureNames = ['neighbour_price_lag', 'built_area', 'age', 'baths', 'crime', 'immigrants', 'inside_m30', 'elevator', 'good_condition', 'longitude', 'latitude'];
+// Same order as FEATURES: lag, the 8 house/area columns, then coordinates.
+const featureNames = [...FEATURES];
 const raw = (h: House) => [lag(h), ...h.f, h.lon, h.lat];
 const xTrainRaw = train.map(raw);
 const xValRaw = val.map(raw);

@@ -107,6 +107,13 @@ const jsonLd = {
         const t = localStorage.getItem('theme');
         if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
       } catch {}
+      // Focus lens before paint too (same precedence as chrome.ts: URL, then stored), so lens-only content never flashes.
+      try {
+        const ok = ['ds', 'quant', 'ai', 'de'];
+        const u = new URLSearchParams(location.search).get('lens');
+        const l = ok.includes(u) ? u : localStorage.getItem('lens');
+        if (ok.includes(l)) document.documentElement.dataset.lens = l;
+      } catch {}
     </script>
   </head>
   <body class={printable ? 'printable' : undefined}>

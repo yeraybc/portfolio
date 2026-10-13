@@ -18,20 +18,67 @@ export const lensStack: Record<Lens, string[]> = {
   de: ['PySpark', 'Databricks', 'AWS S3', 'Parquet', 'pytest', 'GitHub Actions', 'SQL'],
 };
 
+/** Second sentence of the home intro under each lens. The headline stays "Data Scientist". */
+export const lensFocus: Record<Lens, L> = {
+  ds: {
+    en: 'Mostly spatial ML for property valuation, credit scoring and models I can explain, in Python and R.',
+    es: 'Sobre todo ML espacial para valorar viviendas, scoring de crédito y modelos que puedo explicar, en Python y R.',
+  },
+  ai: {
+    en: 'Lately that includes LLM agents: at Velle Capital I built one with the Claude Agent SDK that standardises client data and escalates what it is unsure about. It is in pilot.',
+    es: 'Últimamente eso incluye agentes con LLM: en Velle Capital construí uno con el Claude Agent SDK que homogeneiza datos de clientes y eleva a revisión lo que no tiene claro. Está en piloto.',
+  },
+  quant: {
+    en: 'Much of it is time series and risk: volatility forecasting with VaR backtesting, cointegration, and commodity analysis for a student fund.',
+    es: 'Buena parte son series temporales y riesgo: predicción de volatilidad con backtesting del VaR, cointegración y análisis de materias primas para un fondo de estudiantes.',
+  },
+  de: {
+    en: 'I care about the plumbing too: a 30M-row pipeline with 1,507 tests, and PySpark jobs in Databricks over AWS S3 at Velle Capital.',
+    es: 'También me importa la fontanería: un pipeline de 30M de filas con 1.507 tests y jobs de PySpark en Databricks sobre AWS S3 en Velle Capital.',
+  },
+};
+
 export interface Kpi {
   value: L;
   label: L;
-  run: string;
+  /** Locale-free path of the page the figure comes from, e.g. "/runs/home-credit". */
+  href: string;
 }
 
-/** Run summary row on the home page. Every figure links to the run it comes from. */
-export const kpis: Kpi[] = [
-  { value: { en: '30M+', es: '+30M' }, label: { en: 'rows processed', es: 'filas procesadas' }, run: 'home-credit' },
-  { value: { en: '−90%', es: '−90 %' }, label: { en: 'memory footprint', es: 'memoria' }, run: 'home-credit' },
-  { value: { en: '1,507', es: '1.507' }, label: { en: 'automated tests', es: 'tests automáticos' }, run: 'home-credit' },
-  { value: { en: 'R² 0.43 → 0.62', es: 'R² 0,43 → 0,62' }, label: { en: 'vs OLS, Madrid homes', es: 'frente a OLS, viviendas' }, run: 'madrid-data-house' },
-  { value: { en: 'QLIKE −52.7%', es: 'QLIKE −52,7 %' }, label: { en: 'vs GARCH, natural gas', es: 'frente a GARCH, gas natural' }, run: 'energy-volatility' },
-];
+/**
+ * Run summary row on the home page, one per focus lens. Every figure is already published
+ * in the run or deployment it links to.
+ */
+export const kpis: Record<Lens, Kpi[]> = {
+  ds: [
+    { value: { en: 'R² 0.43 → 0.62', es: 'R² 0,43 → 0,62' }, label: { en: 'vs OLS, Madrid homes', es: 'frente a OLS, viviendas' }, href: '/runs/madrid-data-house' },
+    { value: { en: "Moran's I 0.21 → −0.03", es: 'I de Moran 0,21 → −0,03' }, label: { en: 'no spatial bias left in residuals', es: 'sin sesgo espacial en los residuos' }, href: '/runs/madrid-data-house' },
+    { value: { en: 'QLIKE −52.7%', es: 'QLIKE −52,7 %' }, label: { en: 'vs GARCH, natural gas', es: 'frente a GARCH, gas natural' }, href: '/runs/energy-volatility' },
+    { value: { en: '30M+', es: '+30M' }, label: { en: 'rows in a credit-scoring pipeline', es: 'filas en un pipeline de scoring' }, href: '/runs/home-credit' },
+    { value: { en: '1,507', es: '1.507' }, label: { en: 'automated tests', es: 'tests automáticos' }, href: '/runs/home-credit' },
+  ],
+  ai: [
+    { value: { en: '~1 h → 5 min', es: '~1 h → 5 min' }, label: { en: 'to standardise 40 spreadsheets (agent, pilot)', es: 'para homogeneizar 40 excels (agente, piloto)' }, href: '/runs/data-ingestion-agent' },
+    { value: { en: '98%', es: '98 %' }, label: { en: 'field-level accuracy, rest escalated', es: 'acierto por campo, el resto a revisión' }, href: '/runs/data-ingestion-agent' },
+    { value: { en: '250k+', es: '+250k' }, label: { en: 'listings being geo-referenced', es: 'anuncios en georreferenciación' }, href: '/runs/geo-referencing' },
+    { value: { en: 'BiLSTM ≈ HAR', es: 'BiLSTM ≈ HAR' }, label: { en: 'a 4-coefficient model matches the network', es: 'un modelo de 4 coeficientes iguala a la red' }, href: '/runs/energy-volatility' },
+    { value: { en: '5 days', es: '5 días' }, label: { en: 'to own projects (usual: 1 month)', es: 'hasta proyectos propios (lo normal: 1 mes)' }, href: '/deployments' },
+  ],
+  quant: [
+    { value: { en: 'QLIKE −52.7%', es: 'QLIKE −52,7 %' }, label: { en: 'vs GARCH, natural gas', es: 'frente a GARCH, gas natural' }, href: '/runs/energy-volatility' },
+    { value: { en: 'VaR −160 bp', es: 'VaR −160 pb' }, label: { en: '99% VaR vs GARCH, no extra violations', es: 'VaR99 % frente a GARCH, sin más excepciones' }, href: '/runs/energy-volatility' },
+    { value: { en: '$2.1–2.2M', es: '2,1–2,2 M USD' }, label: { en: 'regulatory capital freed', es: 'de capital regulatorio liberado' }, href: '/runs/energy-volatility' },
+    { value: { en: 'ρ 0.94 → 0.34', es: 'ρ 0,94 → 0,34' }, label: { en: 'BTC–NASDAQ, levels vs returns', es: 'BTC–NASDAQ, niveles frente a retornos' }, href: '/runs/btc-nasdaq-fed' },
+    { value: { en: '+3 pp', es: '+3 pp' }, label: { en: 'recommended asset, 6-week cycle', es: 'activo recomendado, ciclo de 6 semanas' }, href: '/deployments' },
+  ],
+  de: [
+    { value: { en: '30M+', es: '+30M' }, label: { en: 'rows processed', es: 'filas procesadas' }, href: '/runs/home-credit' },
+    { value: { en: '4.9 → 0.5 GB', es: '4,9 → 0,5 GB' }, label: { en: 'memory footprint (−90%)', es: 'memoria (−90 %)' }, href: '/runs/home-credit' },
+    { value: { en: '1,507', es: '1.507' }, label: { en: 'automated tests, CI on every PR', es: 'tests automáticos, CI en cada PR' }, href: '/runs/home-credit' },
+    { value: { en: '2M+', es: '+2M' }, label: { en: 'records in PySpark jobs on S3', es: 'registros en jobs de PySpark sobre S3' }, href: '/deployments' },
+    { value: { en: '15 folds', es: '15 folds' }, label: { en: 'feature pipeline refit in each', es: 'pipeline de features reajustado en cada uno' }, href: '/runs/home-credit' },
+  ],
+};
 
 export interface Cert {
   name: string;

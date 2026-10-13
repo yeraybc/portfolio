@@ -29,10 +29,16 @@ export function pathFor(points: number[], g: LiveRunGeometry, width: number) {
   return points.map((v, i) => `${i ? 'L' : 'M'}${xs(i + 1).toFixed(1)},${ys(v).toFixed(1)}`).join('');
 }
 
-export function liveRunSvg(g: LiveRunGeometry, width: number, points: number[], l: LiveRunLabels, staticCurve?: number[]) {
+/** Y range rounded to hundreds with some air, covering every curve and the baseline. */
+export function yRange(values: number[]): { yMin: number; yMax: number } {
+  return { yMax: Math.ceil((Math.max(...values) + 40) / 100) * 100, yMin: Math.floor((Math.min(...values) - 40) / 100) * 100 };
+}
+
+export function liveRunSvg(g: LiveRunGeometry, width: number, points: number[], l: LiveRunLabels, staticCurve?: number[], previous: number[][] = []) {
   const { H, xs, ys } = scales(g, width);
   const ticks: number[] = [];
-  for (let v = g.yMin; v <= g.yMax; v += 100) ticks.push(v);
+  const step = g.yMax - g.yMin > 600 ? 200 : 100;
+  for (let v = g.yMin; v <= g.yMax; v += step) ticks.push(v);
   const last = points.at(-1);
   const head = last === undefined ? { x: xs(1), y: ys(staticCurve?.[0] ?? g.yMax) } : { x: xs(points.length), y: ys(last) };
   return `
@@ -44,6 +50,7 @@ export function liveRunSvg(g: LiveRunGeometry, width: number, points: number[], 
   <text x="${(width + PAD.l) / 2}" y="${H - 6}" class="tick" text-anchor="middle">${l.epoch}</text>
   <line x1="${PAD.l}" x2="${width - PAD.r}" y1="${ys(g.ols)}" y2="${ys(g.ols)}" class="ols"/>
   <text x="${width - PAD.r}" y="${ys(g.ols) - 6}" text-anchor="end" class="ols-lbl">${l.baseline} ${l.fmt(g.ols)}</text>
+  ${previous.map((c) => `<path d="${pathFor(c, g, width)}" class="curve curve-prev"/>`).join('')}
   ${staticCurve ? `<path d="${pathFor(staticCurve, g, width)}" class="curve curve-static"/>` : ''}
   <path d="${pathFor(points, g, width)}" class="curve curve-live" data-path/>
   <circle r="4" class="head" data-head cx="${head.x}" cy="${head.y}"/>
