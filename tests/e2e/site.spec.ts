@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const routes = ['/', '/runs', '/compare', '/deployments', '/model-card', '/cv', '/runs/madrid-data-house', '/runs/energy-volatility', '/runs/home-credit', '/runs/portfolio'];
+const routes = ['/', '/runs', '/compare', '/match', '/deployments', '/model-card', '/cv', '/runs/madrid-data-house', '/runs/energy-volatility', '/runs/home-credit', '/runs/portfolio'];
 
 for (const locale of ['', '/es']) {
   for (const route of routes) {
@@ -125,4 +125,32 @@ test('home credit never shows model metrics', async ({ page }) => {
   const text = await page.locator('main').innerText();
   expect(text).not.toMatch(/\bAUC\s*[=:]?\s*0[.,]\d/);
   await expect(page.locator('main')).toContainText('Sealed until holdout');
+});
+
+test('match: an example offer gets a verdict backed by links to runs', async ({ page }) => {
+  await page.goto('/match');
+  await page.locator('[data-example="bank"]').click();
+  await expect(page.locator('[data-verdict]')).toHaveText('Good fit');
+  await expect(page.locator('.mt-table tbody tr').first().locator('a').first()).toHaveAttribute('href', /^\/(runs|deployments|cv|model-card)/);
+  // The link carries the chips, never the pasted text.
+  expect(page.url()).toContain('skills=');
+  expect(page.url()).not.toContain('Retail');
+});
+
+test('match: pasted text becomes editable chips, and gaps are said out loud', async ({ page }) => {
+  await page.goto('/es/match');
+  await page.locator('#mt-offer').fill('Senior Quant Developer. Más de 5 años de experiencia. Requisitos: C++, Linux, Python.');
+  await page.getByRole('button', { name: 'Leer requisitos' }).click();
+  await expect(page.locator('.mt-chip')).toHaveCount(3);
+  await expect(page.locator('[data-verdict]')).toHaveText('No encaja');
+  await expect(page.locator('tr[data-status="gap"]')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Quitar C++ / C#' }).click();
+  await expect(page.locator('.mt-chip')).toHaveCount(2);
+});
+
+test('match: a shared link restores the requirements', async ({ page }) => {
+  await page.goto('/match?role=ds&sector=finance&level=intern&skills=python,sql,~tableau');
+  await expect(page.locator('.mt-chip')).toHaveCount(3);
+  await expect(page.locator('.mt-chip.p-nice')).toHaveText(/Tableau/);
+  await expect(page.locator('[data-verdict]')).toHaveText('Good fit');
 });
