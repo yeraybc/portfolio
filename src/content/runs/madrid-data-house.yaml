@@ -3,7 +3,6 @@ status: production
 lenses: [ds, quant]
 lens_rank: { ds: 1, quant: 4, ai: 6, de: 5 }
 year: "2026"
-featured: true
 stack: [R, XGBoost, Random Forest, spdep, spatialreg, gstat, tidymodels, Shiny]
 summary:
   en: Spatial ML property valuation for Madrid, live as a free Shiny app.
@@ -46,19 +45,22 @@ metrics:
     value: -0.03
     target: 0
     decimals: 2
-    significance: "p = 0.002 → p = 0.998"
+    significance: { en: "p = 0.002 → p = 0.998", es: "p = 0,002 → p = 0,998" }
 config:
   data:
-    homes: "10,512 Madrid listings"
-    test_set: "5,229 unseen homes"
-    sources: [housing features, neighbourhood socio-economics, Madrid Geoportal cartography]
+    homes: { en: "10,512 Madrid listings", es: "10.512 anuncios de Madrid" }
+    test_set: { en: "5,229 unseen homes", es: "5.229 viviendas no vistas" }
+    sources:
+      - { en: housing features, es: características de la vivienda }
+      - { en: neighbourhood socio-economics, es: socioeconomía del barrio }
+      - { en: Madrid Geoportal cartography, es: cartografía del Geoportal de Madrid }
   features:
     spatial_weights: "KNN, k = 8"
-    neighbourhood_lags: [price, crime, income, immigration]
+    neighbourhood_lags: [{ en: price, es: precio }, { en: crime, es: criminalidad }, { en: income, es: renta }, { en: immigration, es: inmigración }]
   models: [OLS (baseline), SAR, Random Forest, XGBoost]
   geostatistical_check: Universal Kriging
-  tuning: hyperparameter search for RF and XGBoost
-  deployment: Shiny app on shinyapps.io
+  tuning: { en: hyperparameter search for RF and XGBoost, es: búsqueda de hiperparámetros para RF y XGBoost }
+  deployment: { en: Shiny app on shinyapps.io, es: app Shiny en shinyapps.io }
 decisions:
   - title: { en: "Treat location as signal, not noise", es: "La localización como señal, no como ruido" }
     body:

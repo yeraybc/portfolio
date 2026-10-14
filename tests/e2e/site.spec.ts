@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const routes = ['/', '/runs', '/compare', '/match', '/deployments', '/model-card', '/cv', '/runs/madrid-data-house', '/runs/energy-volatility', '/runs/home-credit', '/runs/portfolio'];
+const routes = ['/', '/projects', '/compare', '/match', '/deployments', '/model-card', '/cv', '/projects/madrid-data-house', '/projects/energy-volatility', '/projects/home-credit', '/projects/portfolio'];
 
 for (const locale of ['', '/es']) {
   for (const route of routes) {
@@ -21,6 +21,8 @@ for (const locale of ['', '/es']) {
 
 test('the live run trains in the browser and beats the baseline', async ({ page }) => {
   await page.goto('/');
+  // It starts training when it scrolls into view (the current deployment sits above it).
+  await page.locator('.hero').scrollIntoViewIfNeeded();
   await expect(page.locator('[data-pill]')).toContainText('Beats baseline', { timeout: 15_000 });
   await expect(page.locator('[data-epoch]')).not.toHaveText('0');
 });
@@ -36,6 +38,7 @@ test('reduced motion shows the final curve without training', async ({ browser }
 
 test('an ablation run gets its own OLS baseline and a row in the runs table', async ({ page }) => {
   await page.goto('/');
+  await page.locator('.hero').scrollIntoViewIfNeeded();
   // Start before the automatic run ends: the default row must keep its published result.
   await expect(page.locator('[data-pill]')).toContainText('Training');
   await page.locator('[data-controls] select[name="set"]').selectOption('house');
@@ -65,21 +68,46 @@ test('the lens also applies in Spanish', async ({ page }) => {
 });
 
 test('the quant lens puts the volatility paper first and survives navigation', async ({ page }) => {
-  await page.goto('/runs?lens=quant');
+  await page.goto('/projects?lens=quant');
   await expect(page.locator('#runs-table tbody tr').first()).toHaveAttribute('data-run', 'energy-volatility');
   await expect(page.locator('[data-lens-select]')).toHaveValue('quant');
   await page.getByRole('link', { name: 'Overview' }).click();
   await expect(page).toHaveURL(/lens=quant/);
 });
 
-test('run filters narrow the table and can be cleared', async ({ page }) => {
-  await page.goto('/runs');
+test('project filters narrow the table and can be cleared', async ({ page }) => {
+  await page.goto('/projects');
   await page.locator('label', { hasText: 'production' }).click();
   await expect(page.locator('#runs-table tbody tr:visible')).toHaveCount(2);
   await page.locator('select[name="tool"]').selectOption('PyTorch');
   await expect(page.locator('[data-empty]')).toBeVisible();
   await page.locator('[data-clear]').click();
   await expect(page.locator('#runs-table tbody tr:visible')).toHaveCount(8);
+});
+
+test('the tool filter groups tools and can filter by a whole group', async ({ page }) => {
+  await page.goto('/projects');
+  await expect(page.locator('select[name="tool"] optgroup')).toHaveCount(6);
+  await page.locator('select[name="tool"]').selectOption({ label: 'AI and agents: all (2)' });
+  await expect(page.locator('#runs-table tbody tr:visible')).toHaveCount(2);
+  await page.locator('select[name="tool"]').selectOption({ label: 'PySpark (1)' });
+  await expect(page.locator('#runs-table tbody tr:visible')).toHaveAttribute('data-run', 'geo-referencing');
+});
+
+test('the home lists the three top projects of the current focus', async ({ page }) => {
+  const featured = page.locator('section[aria-labelledby="featured-title"] tbody tr:visible');
+  await page.goto('/');
+  await expect(featured).toHaveCount(3);
+  await expect(featured.first()).toHaveAttribute('data-run', 'madrid-data-house');
+  await page.goto('/?lens=ai');
+  await expect(featured).toHaveCount(3);
+  await expect(featured.first()).toHaveAttribute('data-run', 'data-ingestion-agent');
+});
+
+test('config blocks are translated on Spanish pages', async ({ page }) => {
+  await page.goto('/es/projects/ds-teaching-portal#config');
+  await expect(page.locator('#config')).toContainText('notebooks de Jupyter');
+  await expect(page.locator('#config')).not.toContainText('in development');
 });
 
 test('compare reads the URL and shows deltas', async ({ page }) => {
@@ -101,11 +129,11 @@ test('command palette opens with the keyboard and navigates', async ({ page }) =
   await expect(input).toBeFocused();
   await input.fill('home credit');
   await page.keyboard.press('Enter');
-  await expect(page).toHaveURL(/\/runs\/home-credit/);
+  await expect(page).toHaveURL(/\/projects\/home-credit/);
 });
 
 test('run tabs switch panels and respect the hash', async ({ page }) => {
-  await page.goto('/runs/energy-volatility#metrics');
+  await page.goto('/projects/energy-volatility#metrics');
   await expect(page.locator('#metrics')).toBeVisible();
   await expect(page.locator('#overview')).toBeHidden();
   await page.getByRole('tab', { name: 'Decisions' }).click();
@@ -116,22 +144,22 @@ test('theme toggle persists across pages', async ({ page }) => {
   await page.goto('/');
   await page.locator('[data-theme-toggle]').first().click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  await page.goto('/runs');
+  await page.goto('/projects');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 });
 
 test('home credit never shows model metrics', async ({ page }) => {
-  await page.goto('/runs/home-credit');
+  await page.goto('/projects/home-credit');
   const text = await page.locator('main').innerText();
   expect(text).not.toMatch(/\bAUC\s*[=:]?\s*0[.,]\d/);
   await expect(page.locator('main')).toContainText('Sealed until holdout');
 });
 
-test('match: an example offer gets a verdict backed by links to runs', async ({ page }) => {
+test('match: an example offer gets a verdict backed by links to projects', async ({ page }) => {
   await page.goto('/match');
   await page.locator('[data-example="bank"]').click();
   await expect(page.locator('[data-verdict]')).toHaveText('Good fit');
-  await expect(page.locator('.mt-table tbody tr').first().locator('a').first()).toHaveAttribute('href', /^\/(runs|deployments|cv|model-card)/);
+  await expect(page.locator('.mt-table tbody tr').first().locator('a').first()).toHaveAttribute('href', /^\/(projects|deployments|cv|model-card)/);
   // The link carries the chips, never the pasted text.
   expect(page.url()).toContain('skills=');
   expect(page.url()).not.toContain('Retail');

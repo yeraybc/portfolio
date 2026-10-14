@@ -3,20 +3,23 @@ status: running
 lenses: [de, ds]
 lens_rank: { ds: 6, quant: 7, ai: 4, de: 3 }
 year: "2026"
-featured: false
 stack: [Python, PySpark, Databricks, AWS S3]
 summary:
-  en: Assigning coordinates to more than 250,000 property listings whose exact address is often hidden. In progress at Velle Capital.
-  es: Asignar coordenadas a más de 250.000 anuncios inmobiliarios cuya dirección exacta suele estar oculta. En curso en Velle Capital.
+  en: Assigning coordinates to more than 250,000 property listings whose exact address is often hidden.
+  es: Asignar coordenadas a más de 250.000 anuncios inmobiliarios cuya dirección exacta suele estar oculta.
 problem:
-  en: Many sellers do not publish the exact address. Some listings have a precise location, others only a street, an approximate radius or a region, and older ones can no longer be checked online. Exact locations are needed for future valuations.
-  es: Muchos vendedores no publican la dirección exacta. Hay anuncios con ubicación precisa, otros solo con la calle, un radio aproximado o la comunidad autónoma, y los antiguos ya no se pueden verificar online. La ubicación exacta hace falta para futuras valoraciones.
+  en: The vast majority of properties for sale on Idealista do not give an exact address. Some listings have a precise location, others only a street, an approximate radius or a region, and older ones can no longer be checked online. Yet that exact location is needed to value those properties later on.
+  es: La gran mayoría de anuncios en venta de Idealista no proporcionan una dirección exacta. Hay anuncios con ubicación precisa, otros solo con la calle, un radio aproximado o la comunidad autónoma, y los antiguos ya no se pueden verificar online. Sin embargo, esa ubicación exacta es necesaria para poder valorar esos inmuebles en el futuro.
 headline_text: { en: "250k+ listings", es: "+250k anuncios" }
 config:
-  listings: "250,000+ (active and historical)"
-  location_quality: [exact, street only, approximate radius, region only]
-  goal: precise coordinates for valuation models
-  status: in progress
+  listings: { en: "250,000+ (active and historical)", es: "más de 250.000 (activos e históricos)" }
+  location_quality:
+    - { en: exact, es: exacta }
+    - { en: street only, es: solo la calle }
+    - { en: approximate radius, es: radio aproximado }
+    - { en: region only, es: solo la comunidad autónoma }
+  goal: { en: precise coordinates for valuation models, es: coordenadas precisas para los modelos de valoración }
+  status: { en: in progress, es: en curso }
 notes:
   - en: No accuracy or coverage figures until the work is finished and validated.
     es: Sin cifras de precisión ni de cobertura hasta que el trabajo esté terminado y validado.

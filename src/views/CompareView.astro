@@ -4,6 +4,7 @@ import Base from '../layouts/Base.astro';
 import Compare, { type CompareRun } from '../islands/Compare.tsx';
 import type { Locale } from '../i18n/ui';
 import { useT, tr, localePath } from '../i18n/utils';
+import { localizeConfig } from '../lib/yaml';
 
 interface Props {
   locale: Locale;
@@ -14,7 +15,7 @@ const all = (await getCollection('runs')).filter((r) => !r.data.hidden).sort((a,
 const runs: CompareRun[] = all.map((r) => ({
   id: r.id,
   title: tr(r.data.title, locale),
-  href: localePath(`/runs/${r.id}`, locale),
+  href: localePath(`/projects/${r.id}`, locale),
   status: r.data.status,
   statusLabel: t(`status.${r.data.status}`),
   summary: tr(r.data.summary, locale),
@@ -22,10 +23,14 @@ const runs: CompareRun[] = all.map((r) => ({
   baselineLabel: r.data.baseline_label ? tr(r.data.baseline_label, locale) : undefined,
   sealed: r.data.sealed ? tr(r.data.sealed.reason, locale) : undefined,
   headline: r.data.headline_text ? tr(r.data.headline_text, locale) : undefined,
-  metrics: r.data.metrics.map((m) => ({ ...m, name: tr(m.name, locale) })),
+  metrics: r.data.metrics.map((m) => ({
+    ...m,
+    name: tr(m.name, locale),
+    significance: typeof m.significance === 'object' ? tr(m.significance, locale) : m.significance,
+  })),
   engineering: r.data.engineering.map((e) => ({ label: tr(e.label, locale), value: e.value })),
   stack: r.data.stack,
-  config: r.data.config,
+  config: localizeConfig(r.data.config, locale),
 }));
 const es = locale === 'es';
 const strings = {

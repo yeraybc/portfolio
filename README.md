@@ -1,20 +1,20 @@
 # Yeray Benito: portfolio
 
-Personal portfolio of Yeray Benito, Data Scientist in Madrid. It is built as an experiment tracker: every project is a **run** with its config, its metrics against a baseline, the decisions behind it and what did not work.
+Personal portfolio of Yeray Benito, Data Scientist in Madrid. Every project is shown with its config, its metrics against a baseline, the decisions behind it and what did not work.
 
 ## What is in it
 
 | Page | What it shows |
 |---|---|
-| `/` | A small MLP training **live in your browser** (Web Worker, no libraries) on 2,000 Madrid homes against an OLS baseline, plus the run summary and featured runs |
-| `/runs` | All runs, filterable by status and tool |
-| `/runs/[slug]` | One run: overview, config (YAML), metrics, decisions, artifacts, notes |
-| `/compare` | Two runs side by side, shareable with `?a=…&b=…` |
+| `/` | A small MLP training **live in your browser** (Web Worker, no libraries) on 2,000 Madrid homes against an OLS baseline, plus the current role, key figures and the top three projects for the chosen focus |
+| `/projects` | All projects, filterable by status and by tool or tool group (`/runs` redirects here) |
+| `/projects/[slug]` | One project: overview, config (YAML), metrics, decisions, artifacts, notes |
+| `/compare` | Two projects side by side, shareable with `?a=…&b=…` |
 | `/deployments` | Professional experience |
 | `/model-card` | About me, written as a model card |
 | `/cv` | One printable A4 page |
 
-The whole site is available in English (`/`) and Spanish (`/es`). A focus lens (`?lens=ds|quant|ai|de`) reorders runs and highlights the relevant stack, and ⌘K / Ctrl K opens a command palette.
+The whole site is available in English (`/`) and Spanish (`/es`). A focus lens (`?lens=ds|quant|ai|de`) reorders projects and highlights the relevant stack, and ⌘K / Ctrl K opens a command palette.
 
 ## Stack
 

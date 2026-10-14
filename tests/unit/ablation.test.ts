@@ -37,7 +37,7 @@ describe('home KPIs', () => {
     for (const lens of lenses) {
       expect(kpis[lens]).toHaveLength(5);
       for (const k of kpis[lens]) {
-        const run = k.href.match(/^\/runs\/(.+)$/)?.[1];
+        const run = k.href.match(/^\/projects\/(.+)$/)?.[1];
         if (run) expect(runIds.has(run), k.href).toBe(true);
         else expect(['/deployments', '/model-card']).toContain(k.href);
       }

@@ -19,4 +19,3 @@ highlights:
   - en: Taught the team Git and GitHub workflows, and organised roles and task split.
     es: Enseñé al equipo el flujo de trabajo con Git y GitHub, y organicé roles y reparto de tareas.
 stack: [Python, statsmodels, scikit-learn, Git]
-related_runs: [energy-volatility]

@@ -18,7 +18,7 @@ import { contact, lensStack } from '../data/profile';
 
 interface Props {
   locale: Locale;
-  /** Locale-free path of this page, e.g. "/runs/home-credit". */
+  /** Locale-free path of this page, e.g. "/projects/home-credit". */
   path: string;
   title?: string;
   description?: string;
@@ -40,14 +40,14 @@ const paletteData = {
   email: contact.email,
   pages: [
     { label: t('nav.overview'), href: localePath('/', locale) },
-    { label: t('nav.runs'), href: localePath('/runs', locale) },
+    { label: t('nav.runs'), href: localePath('/projects', locale) },
     { label: t('nav.compare'), href: localePath('/compare', locale) },
     { label: t('match.title'), href: localePath('/match', locale) },
     { label: t('nav.deployments'), href: localePath('/deployments', locale) },
     { label: t('nav.modelCard'), href: localePath('/model-card', locale) },
     { label: t('nav.cv'), href: localePath('/cv', locale) },
   ],
-  runs: runs.map((r) => ({ label: tr(r.data.title, locale), hint: tr(r.data.summary, locale), href: localePath(`/runs/${r.id}`, locale) })),
+  runs: runs.map((r) => ({ label: tr(r.data.title, locale), hint: tr(r.data.summary, locale), href: localePath(`/projects/${r.id}`, locale) })),
   otherLocaleHref: localePath(path, locale === 'en' ? 'es' : 'en'),
   strings: {
     placeholder: t('cmdk.placeholder'),

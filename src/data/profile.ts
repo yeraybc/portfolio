@@ -18,6 +18,32 @@ export const lensStack: Record<Lens, string[]> = {
   de: ['PySpark', 'Databricks', 'AWS S3', 'Parquet', 'pytest', 'GitHub Actions', 'SQL'],
 };
 
+/** Groups of the projects page tool filter. Every tool in a visible project belongs to exactly one group. */
+export const toolGroups: { id: string; label: L; tools: string[] }[] = [
+  { id: 'lang', label: { en: 'Languages', es: 'Lenguajes' }, tools: ['Python', 'R', 'TypeScript'] },
+  {
+    id: 'ml',
+    label: { en: 'Machine learning and deep learning', es: 'Machine learning y deep learning' },
+    tools: ['scikit-learn', 'XGBoost', 'LightGBM', 'Random Forest', 'PyTorch', 'imbalanced-learn', 'tidymodels', 'SHAP'],
+  },
+  {
+    id: 'stats',
+    label: { en: 'Econometrics, statistics and spatial', es: 'Econometría, estadística y espacial' },
+    tools: ['statsmodels', 'linearmodels', 'arch', 'pmdarima', 'SciPy', 'spdep', 'spatialreg', 'gstat'],
+  },
+  {
+    id: 'data',
+    label: { en: 'Data and infrastructure', es: 'Datos e infraestructura' },
+    tools: ['pandas', 'Parquet', 'PySpark', 'Databricks', 'AWS S3', 'SQL', 'yfinance', 'fredapi', 'Jupyter'],
+  },
+  { id: 'ai', label: { en: 'AI and agents', es: 'IA y agentes' }, tools: ['Claude Agent SDK', 'Claude Code'] },
+  {
+    id: 'web',
+    label: { en: 'Apps, testing and CI', es: 'Apps, testing y CI' },
+    tools: ['Shiny', 'Astro', 'zod', 'Web Workers', 'pytest', 'Vitest', 'Playwright', 'GitHub Actions', 'Vercel'],
+  },
+];
+
 /** Second sentence of the home intro under each lens. The headline stays "Data Scientist". */
 export const lensFocus: Record<Lens, L> = {
   ds: {
@@ -41,7 +67,7 @@ export const lensFocus: Record<Lens, L> = {
 export interface Kpi {
   value: L;
   label: L;
-  /** Locale-free path of the page the figure comes from, e.g. "/runs/home-credit". */
+  /** Locale-free path of the page the figure comes from, e.g. "/projects/home-credit". */
   href: string;
 }
 
@@ -51,32 +77,32 @@ export interface Kpi {
  */
 export const kpis: Record<Lens, Kpi[]> = {
   ds: [
-    { value: { en: 'R² 0.43 → 0.62', es: 'R² 0,43 → 0,62' }, label: { en: 'vs OLS, Madrid homes', es: 'frente a OLS, viviendas' }, href: '/runs/madrid-data-house' },
-    { value: { en: "Moran's I 0.21 → −0.03", es: 'I de Moran 0,21 → −0,03' }, label: { en: 'no spatial bias left in residuals', es: 'sin sesgo espacial en los residuos' }, href: '/runs/madrid-data-house' },
-    { value: { en: 'QLIKE −52.7%', es: 'QLIKE −52,7 %' }, label: { en: 'vs GARCH, natural gas', es: 'frente a GARCH, gas natural' }, href: '/runs/energy-volatility' },
-    { value: { en: '30M+', es: '+30M' }, label: { en: 'rows in a credit-scoring pipeline', es: 'filas en un pipeline de scoring' }, href: '/runs/home-credit' },
-    { value: { en: '1,507', es: '1.507' }, label: { en: 'automated tests', es: 'tests automáticos' }, href: '/runs/home-credit' },
+    { value: { en: 'R² 0.43 → 0.62', es: 'R² 0,43 → 0,62' }, label: { en: 'vs OLS, Madrid homes', es: 'frente a OLS, viviendas' }, href: '/projects/madrid-data-house' },
+    { value: { en: "Moran's I 0.21 → −0.03", es: 'I de Moran 0,21 → −0,03' }, label: { en: 'no spatial bias left in residuals', es: 'sin sesgo espacial en los residuos' }, href: '/projects/madrid-data-house' },
+    { value: { en: 'QLIKE −52.7%', es: 'QLIKE −52,7 %' }, label: { en: 'vs GARCH, natural gas', es: 'frente a GARCH, gas natural' }, href: '/projects/energy-volatility' },
+    { value: { en: '30M+', es: '+30M' }, label: { en: 'rows in a credit-scoring pipeline', es: 'filas en un pipeline de scoring' }, href: '/projects/home-credit' },
+    { value: { en: '1,507', es: '1.507' }, label: { en: 'automated tests', es: 'tests automáticos' }, href: '/projects/home-credit' },
   ],
   ai: [
-    { value: { en: '~1 h → 5 min', es: '~1 h → 5 min' }, label: { en: 'to standardise 40 spreadsheets (agent, pilot)', es: 'para homogeneizar 40 excels (agente, piloto)' }, href: '/runs/data-ingestion-agent' },
-    { value: { en: '98%', es: '98 %' }, label: { en: 'field-level accuracy, rest escalated', es: 'acierto por campo, el resto a revisión' }, href: '/runs/data-ingestion-agent' },
-    { value: { en: '250k+', es: '+250k' }, label: { en: 'listings being geo-referenced', es: 'anuncios en georreferenciación' }, href: '/runs/geo-referencing' },
-    { value: { en: 'BiLSTM ≈ HAR', es: 'BiLSTM ≈ HAR' }, label: { en: 'a 4-coefficient model matches the network', es: 'un modelo de 4 coeficientes iguala a la red' }, href: '/runs/energy-volatility' },
+    { value: { en: '~1 h → 5 min', es: '~1 h → 5 min' }, label: { en: 'to standardise 40 spreadsheets (agent, pilot)', es: 'para homogeneizar 40 excels (agente, piloto)' }, href: '/projects/data-ingestion-agent' },
+    { value: { en: '98%', es: '98 %' }, label: { en: 'field-level accuracy, rest escalated', es: 'acierto por campo, el resto a revisión' }, href: '/projects/data-ingestion-agent' },
+    { value: { en: '250k+', es: '+250k' }, label: { en: 'listings being geo-referenced', es: 'anuncios en georreferenciación' }, href: '/projects/geo-referencing' },
+    { value: { en: 'BiLSTM ≈ HAR', es: 'BiLSTM ≈ HAR' }, label: { en: 'a 4-coefficient model matches the network', es: 'un modelo de 4 coeficientes iguala a la red' }, href: '/projects/energy-volatility' },
     { value: { en: '5 days', es: '5 días' }, label: { en: 'to own projects (usual: 1 month)', es: 'hasta proyectos propios (lo normal: 1 mes)' }, href: '/deployments' },
   ],
   quant: [
-    { value: { en: 'QLIKE −52.7%', es: 'QLIKE −52,7 %' }, label: { en: 'vs GARCH, natural gas', es: 'frente a GARCH, gas natural' }, href: '/runs/energy-volatility' },
-    { value: { en: 'VaR −160 bp', es: 'VaR −160 pb' }, label: { en: '99% VaR vs GARCH, no extra violations', es: 'VaR99 % frente a GARCH, sin más excepciones' }, href: '/runs/energy-volatility' },
-    { value: { en: '$2.1–2.2M', es: '2,1–2,2 M USD' }, label: { en: 'regulatory capital freed', es: 'de capital regulatorio liberado' }, href: '/runs/energy-volatility' },
-    { value: { en: 'ρ 0.94 → 0.34', es: 'ρ 0,94 → 0,34' }, label: { en: 'BTC–NASDAQ, levels vs returns', es: 'BTC–NASDAQ, niveles frente a retornos' }, href: '/runs/btc-nasdaq-fed' },
+    { value: { en: 'QLIKE −52.7%', es: 'QLIKE −52,7 %' }, label: { en: 'vs GARCH, natural gas', es: 'frente a GARCH, gas natural' }, href: '/projects/energy-volatility' },
+    { value: { en: 'VaR −160 bp', es: 'VaR −160 pb' }, label: { en: '99% VaR vs GARCH, no extra violations', es: 'VaR99 % frente a GARCH, sin más excepciones' }, href: '/projects/energy-volatility' },
+    { value: { en: '$2.1–2.2M', es: '2,1–2,2 M USD' }, label: { en: 'regulatory capital freed', es: 'de capital regulatorio liberado' }, href: '/projects/energy-volatility' },
+    { value: { en: 'ρ 0.94 → 0.34', es: 'ρ 0,94 → 0,34' }, label: { en: 'BTC–NASDAQ, levels vs returns', es: 'BTC–NASDAQ, niveles frente a retornos' }, href: '/projects/btc-nasdaq-fed' },
     { value: { en: '+3 pp', es: '+3 pp' }, label: { en: 'recommended asset, 6-week cycle', es: 'activo recomendado, ciclo de 6 semanas' }, href: '/deployments' },
   ],
   de: [
-    { value: { en: '30M+', es: '+30M' }, label: { en: 'rows processed', es: 'filas procesadas' }, href: '/runs/home-credit' },
-    { value: { en: '4.9 → 0.5 GB', es: '4,9 → 0,5 GB' }, label: { en: 'memory footprint (−90%)', es: 'memoria (−90 %)' }, href: '/runs/home-credit' },
-    { value: { en: '1,507', es: '1.507' }, label: { en: 'automated tests, CI on every PR', es: 'tests automáticos, CI en cada PR' }, href: '/runs/home-credit' },
+    { value: { en: '30M+', es: '+30M' }, label: { en: 'rows processed', es: 'filas procesadas' }, href: '/projects/home-credit' },
+    { value: { en: '4.9 → 0.5 GB', es: '4,9 → 0,5 GB' }, label: { en: 'memory footprint (−90%)', es: 'memoria (−90 %)' }, href: '/projects/home-credit' },
+    { value: { en: '1,507', es: '1.507' }, label: { en: 'automated tests, CI on every PR', es: 'tests automáticos, CI en cada PR' }, href: '/projects/home-credit' },
     { value: { en: '2M+', es: '+2M' }, label: { en: 'records in PySpark jobs on S3', es: 'registros en jobs de PySpark sobre S3' }, href: '/deployments' },
-    { value: { en: '15 folds', es: '15 folds' }, label: { en: 'feature pipeline refit in each', es: 'pipeline de features reajustado en cada uno' }, href: '/runs/home-credit' },
+    { value: { en: '15 folds', es: '15 folds' }, label: { en: 'feature pipeline refit in each', es: 'pipeline de features reajustado en cada uno' }, href: '/projects/home-credit' },
   ],
 };
 
@@ -200,10 +226,10 @@ export const modelCard: Record<'en' | 'es', Record<string, unknown>> = {
     architecture: 'BSc Applied Data Science (UCM, 2027) + Samsung Innovation Campus (AI track, ranked 1st in Coding & Programming)',
     training_data: ['econometrics', 'supervised ML', 'spatial data', 'quantitative finance'],
     fine_tuning: ['CEMFI Summer School 2026 (NLP, embeddings, LLMs, agents)', 'FRM Part I (candidate, Nov 2026)'],
-    intended_use: ['Data Science', 'ML Engineering', 'Applied AI for finance and real estate'],
+    intended_use: ['Data Science', 'ML Engineering', 'AI roles'],
     languages: { es: 'native', en: 'C1', de: 'A2' },
     availability: 'full-time internship from February 2027',
-    evaluation: 'see /runs',
+    evaluation: 'see /projects',
     limitations: [
       'Prefers the simple model when the complex one is not significantly better.',
       'Performs worse before coffee and after 30 km.',
@@ -216,10 +242,10 @@ export const modelCard: Record<'en' | 'es', Record<string, unknown>> = {
     architecture: 'Grado en Ciencia de Datos Aplicada (UCM, 2027) + Samsung Innovation Campus (vía de IA, 1º de la promoción en Coding & Programming)',
     training_data: ['econometría', 'ML supervisado', 'datos espaciales', 'finanzas cuantitativas'],
     fine_tuning: ['CEMFI Summer School 2026 (NLP, embeddings, LLMs, agentes)', 'FRM Part I (candidato, nov 2026)'],
-    intended_use: ['Data Science', 'ML Engineering', 'IA aplicada a finanzas e inmobiliario'],
+    intended_use: ['Data Science', 'ML Engineering', 'Roles de IA'],
     languages: { es: 'nativo', en: 'C1', de: 'A2' },
     availability: 'prácticas a jornada completa desde febrero de 2027',
-    evaluation: 'ver /runs',
+    evaluation: 'ver /projects',
     limitations: [
       'Prefiere el modelo simple si el complejo no es significativamente mejor.',
       'Rinde peor antes del café y después del km 30.',

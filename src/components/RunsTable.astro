@@ -12,8 +12,10 @@ interface Props {
   locale: Locale;
   id?: string;
   maxStack?: number;
+  /** Lenses under which each run is listed, by run id. Runs without an entry show under every lens. */
+  top?: Record<string, string>;
 }
-const { runs, locale, id, maxStack = 4 } = Astro.props;
+const { runs, locale, id, maxStack = 4, top } = Astro.props;
 const t = useT(locale);
 ---
 
@@ -39,13 +41,14 @@ const t = useT(locale);
               data-status={d.status}
               data-stack={d.stack.join('|')}
               data-lenses={d.lenses.join(' ')}
+              data-lens-top={top?.[run.id]}
               data-rank-ds={d.lens_rank.ds}
               data-rank-quant={d.lens_rank.quant}
               data-rank-ai={d.lens_rank.ai}
               data-rank-de={d.lens_rank.de}
             >
               <th scope="row" class="c-run">
-                <a href={localePath(`/runs/${run.id}`, locale)} data-internal>
+                <a href={localePath(`/projects/${run.id}`, locale)} data-internal>
                   {tr(d.title, locale)}
                 </a>
                 <span class="summary">{tr(d.summary, locale)}</span>

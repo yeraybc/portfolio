@@ -20,4 +20,4 @@ highlights:
   - en: Cleared to lead my own projects after 5 working days, where the usual ramp-up is one month.
     es: Visto bueno para llevar proyectos propios en 5 días laborables, cuando lo habitual es un mes.
 stack: [Python, PySpark, Databricks, AWS S3, SQL, Claude Agent SDK]
-related_runs: [data-ingestion-agent, geo-referencing, madrid-data-house]
+related_runs: [data-ingestion-agent, geo-referencing]

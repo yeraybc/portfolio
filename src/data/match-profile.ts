@@ -15,7 +15,7 @@ export type Level = 'proven' | 'used' | 'learning' | 'gap';
 export type Interest = 'core' | 'interested' | 'neutral';
 
 export interface Evidence {
-  /** Locale-free path, e.g. "/runs/home-credit". */
+  /** Locale-free path, e.g. "/projects/home-credit". */
   href: string;
   label: L;
 }
@@ -56,15 +56,15 @@ export interface Role {
 const same = (s: string): L => ({ en: s, es: s });
 
 const ev = {
-  mdh: { href: '/runs/madrid-data-house', label: same('MadridDataHouse') },
-  vol: { href: '/runs/energy-volatility', label: { en: 'Energy volatility paper', es: 'Paper de volatilidad' } },
-  hc: { href: '/runs/home-credit', label: same('Home Credit default risk') },
-  btc: { href: '/runs/btc-nasdaq-fed', label: { en: 'BTC, NASDAQ and the Fed', es: 'BTC, NASDAQ y la Fed' } },
-  agent: { href: '/runs/data-ingestion-agent', label: { en: 'Data ingestion agent', es: 'Agente de homogeneización' } },
-  geo: { href: '/runs/geo-referencing', label: { en: 'Listing geo-referencing', es: 'Georreferenciación' } },
-  salary: { href: '/runs/salary-predictor', label: same('Salary predictor') },
-  teach: { href: '/runs/ds-teaching-portal', label: { en: 'Teaching portal', es: 'Portal de enseñanza' } },
-  portfolio: { href: '/runs/portfolio', label: { en: 'This portfolio', es: 'Este portfolio' } },
+  mdh: { href: '/projects/madrid-data-house', label: same('MadridDataHouse') },
+  vol: { href: '/projects/energy-volatility', label: { en: 'Energy volatility paper', es: 'Paper de volatilidad' } },
+  hc: { href: '/projects/home-credit', label: same('Home Credit default risk') },
+  btc: { href: '/projects/btc-nasdaq-fed', label: { en: 'BTC, NASDAQ and the Fed', es: 'BTC, NASDAQ y la Fed' } },
+  agent: { href: '/projects/data-ingestion-agent', label: { en: 'Data ingestion agent', es: 'Agente de homogeneización' } },
+  geo: { href: '/projects/geo-referencing', label: { en: 'Listing geo-referencing', es: 'Georreferenciación' } },
+  salary: { href: '/projects/salary-predictor', label: same('Salary predictor') },
+  teach: { href: '/projects/ds-teaching-portal', label: { en: 'Data Science, step by step', es: 'Data Science, paso a paso' } },
+  portfolio: { href: '/projects/portfolio', label: { en: 'This portfolio', es: 'Este portfolio' } },
   velle: { href: '/deployments', label: same('Velle Capital') },
   funds: { href: '/deployments', label: same('Arcanix Fund, UCM Finance Society') },
   certs: { href: '/model-card', label: { en: 'Certifications', es: 'Certificaciones' } },

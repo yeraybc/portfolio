@@ -17,8 +17,8 @@ const t = useT(locale);
     <h1>{t('nf.title')}</h1>
     <p>{t('nf.body')}</p>
   </header>
-  <ConfigBlock data={{ status: 'not_found', checked: ['/runs', '/compare', '/deployments'], suggestion: localePath('/runs', locale) }} label="error.yaml" />
+  <ConfigBlock data={{ status: 'not_found', checked: ['/projects', '/compare', '/deployments'], suggestion: localePath('/projects', locale) }} label="error.yaml" />
   <p class="section">
-    <a class="btn btn-primary" href={localePath('/runs', locale)} data-internal>{t('cta.allRuns')}</a>
+    <a class="btn btn-primary" href={localePath('/projects', locale)} data-internal>{t('cta.allRuns')}</a>
   </p>
 </Base>

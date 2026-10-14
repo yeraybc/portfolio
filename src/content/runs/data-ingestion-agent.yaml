@@ -3,7 +3,6 @@ status: pilot
 lenses: [ai, de]
 lens_rank: { ds: 5, quant: 6, ai: 1, de: 2 }
 year: "2026"
-featured: true
 stack: [Python, Claude Agent SDK, Claude Code]
 summary:
   en: An agent that standardises client spreadsheets with heterogeneous formats, built in my first week at Velle Capital. In pilot.
@@ -33,12 +32,12 @@ engineering:
   - { label: { en: Errors on 40 files, es: Fallos en 40 archivos }, value: "2" }
   - { label: { en: Sent to human review, es: Elevados a revisión humana }, value: "5" }
 config:
-  input: 40 client spreadsheets, heterogeneous layouts
-  stages: [Claude Code skill, autonomous agent]
+  input: { en: "40 client spreadsheets, heterogeneous layouts", es: "40 excels de clientes, con formatos distintos" }
+  stages: [{ en: Claude Code skill, es: skill de Claude Code }, { en: autonomous agent, es: agente autónomo }]
   agent: Python, Claude Agent SDK
-  evaluation: accuracy per standardised field, not per file
-  human_in_the_loop: ambiguous fields are escalated for review
-  status: pilot, not yet the official production process
+  evaluation: { en: "accuracy per standardised field, not per file", es: "acierto por campo homogeneizado, no por archivo" }
+  human_in_the_loop: { en: ambiguous fields are escalated for review, es: los campos ambiguos pasan a revisión }
+  status: { en: "pilot, not yet the official production process", es: "piloto, aún no es el proceso oficial en producción" }
 decisions:
   - title: { en: Map the manual process first, es: Mapear primero el proceso manual }
     body:

@@ -3,7 +3,6 @@ status: running
 lenses: [ds, de, quant]
 lens_rank: { ds: 3, quant: 3, ai: 5, de: 1 }
 year: "2026"
-featured: true
 stack: [Python, scikit-learn, pandas, SciPy, LightGBM, imbalanced-learn, Parquet, pytest, GitHub Actions]
 summary:
   en: End-to-end credit scoring pipeline on 31M rows, with modelling in progress and the holdout untouched.
@@ -41,21 +40,24 @@ metrics:
 config:
   data:
     tables: [application_train, bureau, bureau_balance, previous_application]
-    rows: 30,994,078
-    clients: 307,511
-    default_rate: "8.07%"
+    rows: { en: "30,994,078", es: "30.994.078" }
+    clients: { en: "307,511", es: "307.511" }
+    default_rate: { en: "8.07%", es: "8,07 %" }
   features:
     count: 163
-    selection: Information Value on the training clients only
-    recipes: YAML, exported from the EDA ranking
+    selection: { en: Information Value on the training clients only, es: Information Value solo sobre los clientes de entrenamiento }
+    recipes: { en: "YAML, exported from the EDA ranking", es: "YAML, exportado del ranking del EDA" }
   validation:
-    scheme: "5 folds × 3 seeds, feature pipeline refit in every fold"
+    scheme: { en: "5 folds × 3 seeds, feature pipeline refit in every fold", es: "5 folds × 3 semillas, pipeline de features reajustado en cada fold" }
     model_comparison: "Nadeau-Bengio corrected t-test, Bonferroni"
-    holdout: "61,499 clients, used once"
-  imbalance: [class weights or resampling inside the pipeline, decision threshold, calibration]
-  models: [logistic regression (base), Random Forest, LightGBM]
-  engineering: "1,507 pytest tests, CI on every push and PR, Parquet via pyarrow"
-  next: [interpretability, REST API, Docker + MLflow, monitoring]
+    holdout: { en: "61,499 clients, used once", es: "61.499 clientes, usado una sola vez" }
+  imbalance:
+    - { en: class weights or resampling inside the pipeline, es: pesos de clase o remuestreo dentro del pipeline }
+    - { en: decision threshold, es: umbral de decisión }
+    - { en: calibration, es: calibración }
+  models: [{ en: logistic regression (base), es: regresión logística (base) }, Random Forest, LightGBM]
+  engineering: { en: "1,507 pytest tests, CI on every push and PR, Parquet via pyarrow", es: "1.507 tests de pytest, CI en cada push y PR, Parquet con pyarrow" }
+  next: [{ en: interpretability, es: interpretabilidad }, API REST, Docker + MLflow, { en: monitoring, es: monitorización }]
 decisions:
   - title: { en: Statistics behind every EDA choice, es: Estadística detrás de cada decisión del EDA }
     body:

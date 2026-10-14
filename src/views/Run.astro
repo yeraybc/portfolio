@@ -12,6 +12,7 @@ import Delta from '../components/Delta.astro';
 import type { Locale } from '../i18n/ui';
 import { useT, tr, localePath } from '../i18n/utils';
 import { fmtNum, fmtBaseline, withUnit } from '../lib/format';
+import { localizeConfig } from '../lib/yaml';
 
 interface Props {
   locale: Locale;
@@ -42,10 +43,10 @@ const tabs = [
 ].filter(Boolean) as { id: string; label: string }[];
 ---
 
-<Base locale={locale} path={`/runs/${run.id}`} title={title} description={tr(d.summary, locale)}>
+<Base locale={locale} path={`/projects/${run.id}`} title={title} description={tr(d.summary, locale)}>
   <article class="run">
     <header class="run-head">
-      <a class="back" href={localePath('/runs', locale)} data-internal>{t('run.back')}</a>
+      <a class="back" href={localePath('/projects', locale)} data-internal>{t('run.back')}</a>
       <div class="meta">
         <StatusBadge status={d.status} locale={locale} />
         <span class="num muted">{d.year}</span>
@@ -127,7 +128,7 @@ const tabs = [
 
     <section id="config" class="tab-panel" role="tabpanel" aria-labelledby="tab-config">
       <h2 class="panel-title">{t('run.tab.config')}</h2>
-      <ConfigBlock data={d.config} label={`${run.id}.yaml`} />
+      <ConfigBlock data={localizeConfig(d.config, locale)} label={`${run.id}.yaml`} />
     </section>
 
     {
