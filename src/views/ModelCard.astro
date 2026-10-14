@@ -5,6 +5,7 @@ import ConfigBlock from '../components/ConfigBlock.astro';
 import type { Locale } from '../i18n/ui';
 import { useT, tr } from '../i18n/utils';
 import { certs, modelCard } from '../data/profile';
+import { localizeConfig } from '../lib/yaml';
 
 interface Props {
   locale: Locale;
@@ -50,7 +51,7 @@ const rank = (i: number, lenses: string[], lens: string) => (lenses.includes(len
   <section class="section" aria-labelledby="marathon-title">
     <h2 id="marathon-title">{t('mc.marathon')}</h2>
     <p class="muted run-lede">{tr(marathon.data.summary, locale)}</p>
-    <ConfigBlock data={marathon.data.config} label="madrid-marathon-2027.yaml" />
+    <ConfigBlock data={localizeConfig(marathon.data.config, locale)} label="madrid-marathon-2027.yaml" />
   </section>
 </Base>
 

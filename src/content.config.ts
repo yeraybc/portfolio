@@ -12,7 +12,7 @@ const metric = z.object({
   value: z.number(),
   lower_is_better: z.boolean().default(false),
   target: z.number().optional(),
-  significance: z.string().optional(),
+  significance: z.union([z.string(), l]).optional(),
   decimals: z.number().int().min(0).max(4).optional(),
   /** Relative change as published in the source (computed from unrounded values). */
   reported_pct: z.number().optional(),
@@ -28,7 +28,6 @@ const runs = defineCollection({
     lenses: z.array(lensEnum),
     lens_rank: z.record(lensEnum, z.number()).default({}),
     year: z.string(),
-    featured: z.boolean().default(false),
     hidden: z.boolean().default(false),
     stack: z.array(z.string()),
     summary: l,

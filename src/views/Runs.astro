@@ -5,6 +5,7 @@ import RunsTable from '../components/RunsTable.astro';
 import StatusBadge from '../components/StatusBadge.astro';
 import type { Locale } from '../i18n/ui';
 import { useT, tr, localePath } from '../i18n/utils';
+import { toolGroups } from '../data/profile';
 
 interface Props {
   locale: Locale;
@@ -16,10 +17,19 @@ const byRank = (a: (typeof all)[number], b: (typeof all)[number]) => (a.data.len
 const active = all.filter((r) => r.data.status !== 'archived').sort(byRank);
 const archived = all.filter((r) => r.data.status === 'archived').sort(byRank);
 const statuses = ['production', 'running', 'pilot', 'research'] as const;
-const tools = [...new Set(active.flatMap((r) => r.data.stack))].sort((a, b) => a.localeCompare(b));
+const uses = (tool: string) => active.filter((r) => r.data.stack.includes(tool)).length;
+const used = new Set(active.flatMap((r) => r.data.stack));
+const grouped = new Set(toolGroups.flatMap((g) => g.tools));
+const other = [...used].filter((tool) => !grouped.has(tool)).sort((a, b) => a.localeCompare(b));
+const groups = [
+  ...toolGroups.map((g) => ({ id: g.id, label: tr(g.label, locale), tools: g.tools.filter((tool) => used.has(tool)) })),
+  { id: 'other', label: t('runs.filter.other'), tools: other },
+]
+  .filter((g) => g.tools.length > 0)
+  .map((g) => ({ ...g, count: active.filter((r) => r.data.stack.some((tool) => g.tools.includes(tool))).length }));
 ---
 
-<Base locale={locale} path="/runs" title={t('runs.title')} description={t('runs.lede')}>
+<Base locale={locale} path="/projects" title={t('runs.title')} description={t('runs.lede')}>
   <header class="page-head">
     <h1>{t('runs.title')}</h1>
     <p>{t('runs.lede')}</p>
@@ -44,7 +54,20 @@ const tools = [...new Set(active.flatMap((r) => r.data.stack))].sort((a, b) => a
       <span class="visually-hidden">{t('runs.filter.stack')}</span>
       <select name="tool">
         <option value="">{t('runs.filter.anyStack')}</option>
-        {tools.map((tool) => <option value={tool}>{tool}</option>)}
+        {
+          groups.map((g) => (
+            <optgroup label={g.label}>
+              <option value={`group:${g.tools.join('|')}`}>
+                {t('runs.filter.groupAll').replace('{group}', g.label)} ({g.count})
+              </option>
+              {g.tools.map((tool) => (
+                <option value={tool}>
+                  {tool} ({uses(tool)})
+                </option>
+              ))}
+            </optgroup>
+          ))
+        }
       </select>
     </label>
     <p class="count num" aria-live="polite" data-count></p>
@@ -66,7 +89,7 @@ const tools = [...new Set(active.flatMap((r) => r.data.stack))].sort((a, b) => a
       {
         archived.map((r) => (
           <li>
-            <a href={localePath(`/runs/${r.id}`, locale)} data-internal>
+            <a href={localePath(`/projects/${r.id}`, locale)} data-internal>
               {tr(r.data.title, locale)}
             </a>
             <span class="muted">{tr(r.data.summary, locale)}</span>
@@ -93,9 +116,11 @@ const tools = [...new Set(active.flatMap((r) => r.data.stack))].sort((a, b) => a
     const apply = () => {
       const status = (form.elements.namedItem('status') as RadioNodeList).value;
       const tool = (form.elements.namedItem('tool') as HTMLSelectElement).value;
+      const wanted = tool.startsWith('group:') ? tool.slice(6).split('|') : tool ? [tool] : [];
       let shown = 0;
       rows.forEach((r) => {
-        const ok = (status === 'all' || r.dataset.status === status) && (!tool || r.dataset.stack!.split('|').includes(tool));
+        const stack = r.dataset.stack!.split('|');
+        const ok = (status === 'all' || r.dataset.status === status) && (!wanted.length || wanted.some((w) => stack.includes(w)));
         r.hidden = !ok;
         if (ok) shown++;
       });

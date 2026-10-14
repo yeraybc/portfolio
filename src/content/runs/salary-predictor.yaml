@@ -3,7 +3,6 @@ status: archived
 lenses: [ds]
 lens_rank: { ds: 9, quant: 9, ai: 9, de: 10 }
 year: "2026"
-featured: false
 stack: [Python, scikit-learn, SHAP]
 summary:
   en: Explainable salary regression with SHAP and a simulator. An early learning project.
@@ -16,7 +15,7 @@ finding:
   es: Las dos variables más predictivas eran de creación propia, por delante de todas las originales.
 headline_text: { en: "R² 0.916 on test", es: "R² 0,916 en test" }
 config:
-  data: "250,000 rows, 10 original + 16 engineered features"
+  data: { en: "250,000 rows, 10 original + 16 engineered features", es: "250.000 filas, 10 variables originales + 16 construidas" }
   models: [ElasticNet, KNN, Random Forest, Gradient Boosting]
   tuning: GridSearchCV
   explainability: SHAP

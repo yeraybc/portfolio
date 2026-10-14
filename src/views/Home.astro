@@ -6,13 +6,22 @@ import RunsTable from '../components/RunsTable.astro';
 import type { Locale } from '../i18n/ui';
 import { useT, tr, localePath } from '../i18n/utils';
 import { contact, kpis, lensFocus, lenses } from '../data/profile';
+import type { Lens } from '../lib/lens';
 
 interface Props {
   locale: Locale;
 }
 const { locale } = Astro.props;
 const t = useT(locale);
-const runs = (await getCollection('runs')).filter((r) => r.data.featured).sort((a, b) => (a.data.lens_rank.ds ?? 99) - (b.data.lens_rank.ds ?? 99));
+const FEATURED_PER_LENS = 3;
+const active = (await getCollection('runs')).filter((r) => !r.data.hidden && r.data.status !== 'archived');
+// The table lists the top runs of every lens; CSS shows only those of the current lens.
+const byLens = (l: Lens) => [...active].sort((a, b) => (a.data.lens_rank[l] ?? 99) - (b.data.lens_rank[l] ?? 99));
+const top: Record<string, string> = {};
+for (const l of lenses) {
+  for (const r of byLens(l).slice(0, FEATURED_PER_LENS)) top[r.id] = top[r.id] ? `${top[r.id]} ${l}` : l;
+}
+const runs = byLens('ds').filter((r) => top[r.id]);
 const velle = (await getEntry('deployments', 'velle-capital'))!;
 const since = new Intl.DateTimeFormat(locale === 'es' ? 'es-ES' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(velle.data.start));
 ---
@@ -33,6 +42,21 @@ const since = new Intl.DateTimeFormat(locale === 'es' ? 'es-ES' : 'en-GB', { day
       <a class="btn" href={localePath('/cv', locale)} data-internal>{t('cta.cv')}</a>
       <a class="btn btn-ghost" href={contact.linkedin} rel="me">LinkedIn</a>
       <a class="btn btn-ghost" href={contact.github} rel="me">GitHub</a>
+    </div>
+  </section>
+
+  <section class="current" aria-labelledby="dep-title">
+    <div class="dep panel">
+      <h2 id="dep-title">{t('home.current')}</h2>
+      <p class="dep-line">
+        <span class="org">{velle.data.org}</span>
+        <span class="role">{tr(velle.data.role, locale)}</span>
+      </p>
+      <p class="status-line num"><span class="live-dot" aria-hidden="true">●</span> {t('status.running')} {t('dep.since')} {since}</p>
+      <ul>
+        {velle.data.highlights.slice(0, 2).map((h) => <li>{tr(h, locale)}</li>)}
+      </ul>
+      <a href={localePath('/deployments', locale)} data-internal>{t('nav.deployments')}</a>
     </div>
   </section>
 
@@ -63,26 +87,14 @@ const since = new Intl.DateTimeFormat(locale === 'es' ? 'es-ES' : 'en-GB', { day
   <section class="section" aria-labelledby="featured-title">
     <div class="sec-head">
       <h2 id="featured-title">{t('home.recent')}</h2>
-      <a href={localePath('/runs', locale)} data-internal>{t('cta.allRuns')}</a>
+      <a href={localePath('/projects', locale)} data-internal>{t('cta.allRuns')}</a>
     </div>
-    <RunsTable runs={runs} locale={locale} />
+    <RunsTable runs={runs} locale={locale} top={top} />
   </section>
 
-  <section class="section two" aria-labelledby="dep-title">
-    <div class="dep panel">
-      <h2 id="dep-title">{t('home.current')}</h2>
-      <p class="dep-line">
-        <span class="org">{velle.data.org}</span>
-        <span class="role">{tr(velle.data.role, locale)}</span>
-      </p>
-      <p class="status-line num"><span class="live-dot" aria-hidden="true">●</span> {t('status.running')} {t('dep.since')} {since}</p>
-      <ul>
-        {velle.data.highlights.slice(0, 2).map((h) => <li>{tr(h, locale)}</li>)}
-      </ul>
-      <a href={localePath('/deployments', locale)} data-internal>{t('nav.deployments')}</a>
-    </div>
+  <section class="section" aria-labelledby="contact-title">
     <div class="contact panel">
-      <h2>{t('home.contact')}</h2>
+      <h2 id="contact-title">{t('home.contact')}</h2>
       <p>{t('home.available')}</p>
       <p><a class="mail" href={`mailto:${contact.email}`}>{contact.email}</a></p>
       <div class="ctas">
@@ -161,10 +173,8 @@ const since = new Intl.DateTimeFormat(locale === 'es' ? 'es-ES' : 'en-GB', { day
     margin-bottom: var(--s4);
     font-size: var(--fs-sm);
   }
-  .two {
-    display: grid;
-    grid-template-columns: 3fr 2fr;
-    gap: var(--s4);
+  .current {
+    margin-bottom: var(--s6);
   }
   .dep,
   .contact {
@@ -207,7 +217,8 @@ const since = new Intl.DateTimeFormat(locale === 'es' ? 'es-ES' : 'en-GB', { day
     margin: 0;
     padding-left: 1.1em;
     display: grid;
-    gap: var(--s2);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: var(--s2) var(--s6);
     font-size: var(--fs-sm);
     color: var(--text-2);
   }
@@ -246,9 +257,6 @@ const since = new Intl.DateTimeFormat(locale === 'es' ? 'es-ES' : 'en-GB', { day
     .summary div:last-child {
       grid-column: 1 / -1;
       border-left: 0;
-    }
-    .two {
-      grid-template-columns: 1fr;
     }
   }
 </style>

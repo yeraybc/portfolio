@@ -3,7 +3,6 @@ status: research
 lenses: [quant]
 lens_rank: { ds: 7, quant: 2, ai: 8, de: 8 }
 year: "2025"
-featured: false
 stack: [Python, statsmodels, linearmodels, pmdarima, yfinance, fredapi, GitHub Actions]
 summary:
   en: An econometric audit of whether Bitcoin is a safe haven or a systematic-risk amplifier, 2015–2025.
@@ -27,11 +26,16 @@ comparison:
     en: "Shared trends inflate the correlation in levels. The right test is cointegration: ADF on the equilibrium residuals gives −3.91, below the 5% and 1% critical values."
     es: "Las tendencias compartidas inflan la correlación en niveles. El contraste correcto es la cointegración: el ADF sobre los residuos del equilibrio da −3,91, por debajo de los críticos al 5 % y al 1 %."
 config:
-  data: "122 monthly observations, 2015–2025 (yfinance, FRED)"
+  data: { en: "122 monthly observations, 2015–2025 (yfinance, FRED)", es: "122 observaciones mensuales, 2015–2025 (yfinance, FRED)" }
   stationarity: [ADF, KPSS]
   diagnostics: [Durbin-Watson, Breusch-Pagan, Shapiro-Wilk]
-  models: [OLS in levels (diagnosed), "ARIMA / ARIMAX", Engle-Granger cointegration, error-correction model, IV-2SLS]
-  workflow: "54 commits, feature branches merged via pull request, CI on GitHub Actions"
+  models:
+    - { en: OLS in levels (diagnosed), es: OLS en niveles (diagnosticado) }
+    - "ARIMA / ARIMAX"
+    - { en: Engle-Granger cointegration, es: cointegración de Engle-Granger }
+    - { en: error-correction model, es: modelo de corrección del error }
+    - IV-2SLS
+  workflow: { en: "54 commits, feature branches merged via pull request, CI on GitHub Actions", es: "54 commits, ramas de feature integradas por pull request, CI en GitHub Actions" }
 decisions:
   - title: { en: Run OLS in levels to show why it fails, es: Estimar OLS en niveles para enseñar por qué falla }
     body:

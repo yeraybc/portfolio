@@ -1,4 +1,10 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/runs", "destination": "/projects", "permanent": true },
+    { "source": "/runs/:slug", "destination": "/projects/:slug", "permanent": true },
+    { "source": "/es/runs", "destination": "/es/projects", "permanent": true },
+    { "source": "/es/runs/:slug", "destination": "/es/projects/:slug", "permanent": true }
+  ]
 }

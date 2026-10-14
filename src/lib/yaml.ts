@@ -19,7 +19,20 @@ function scalar(v: unknown): Token[] {
   return [{ kind: 'str', text: needsQuotes(s) ? JSON.stringify(s) : s }];
 }
 
-const isFlat = (arr: unknown[]) => arr.every((x) => typeof x !== 'object' || x === null) && JSON.stringify(arr).length < 64;
+const isLocalized = (v: unknown): v is { en: string; es: string } =>
+  !!v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).sort().join() === 'en,es';
+
+/** Resolves every {en, es} leaf of a config to the given locale; keys stay as they are. */
+export function localizeConfig<T>(value: T, locale: 'en' | 'es'): T {
+  if (isLocalized(value)) return value[locale] as T;
+  if (Array.isArray(value)) return value.map((x) => localizeConfig(x, locale)) as T;
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, localizeConfig(v, locale)])) as T;
+  }
+  return value;
+}
+
+const isFlat =(arr: unknown[]) => arr.every((x) => typeof x !== 'object' || x === null) && JSON.stringify(arr).length < 64;
 
 export function toYamlLines(obj: Record<string, unknown>, indent = 0): Line[] {
   const pad = ' '.repeat(indent);

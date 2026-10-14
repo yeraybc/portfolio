@@ -3,7 +3,6 @@ status: research
 lenses: [quant, ds]
 lens_rank: { ds: 2, quant: 1, ai: 7, de: 7 }
 year: "2026"
-featured: true
 stack: [Python, PyTorch, arch, statsmodels, SciPy, pytest, GitHub Actions]
 summary:
   en: Out-of-sample volatility forecasting and VaR backtesting for Brent and natural gas. Single-author paper in preparation for journal submission.
@@ -30,25 +29,25 @@ metrics:
     value: 0.0944
     lower_is_better: true
     decimals: 4
-    significance: "Diebold-Mariano t = −5.25, p < 0.001"
+    significance: { en: "Diebold-Mariano t = −5.25, p < 0.001", es: "Diebold-Mariano t = −5,25, p < 0,001" }
   - name: { en: "QLIKE, natural gas, 5 days (BiLSTM)", es: "QLIKE, gas natural, 5 días (BiLSTM)" }
     baseline: 0.1995
     value: 0.1001
     lower_is_better: true
     decimals: 4
-    significance: "Diebold-Mariano t = −4.62, p < 0.001"
+    significance: { en: "Diebold-Mariano t = −4.62, p < 0.001", es: "Diebold-Mariano t = −4,62, p < 0,001" }
   - name: { en: "QLIKE, natural gas, 1 day (HAR)", es: "QLIKE, gas natural, 1 día (HAR)" }
     baseline: 0.3354
     value: 0.2207
     lower_is_better: true
     decimals: 4
-    significance: "Diebold-Mariano t = −5.59, p < 0.001"
+    significance: { en: "Diebold-Mariano t = −5.59, p < 0.001", es: "Diebold-Mariano t = −5,59, p < 0,001" }
   - name: { en: "QLIKE, Brent, 1 day (BiLSTM)", es: "QLIKE, Brent, 1 día (BiLSTM)" }
     baseline: 0.3577
     value: 0.3152
     lower_is_better: true
     decimals: 4
-    significance: "p = 0.030, not robust to the proxy change"
+    significance: { en: "p = 0.030, not robust to the proxy change", es: "p = 0,030, no es robusto al cambiar el proxy" }
 leaderboard:
   title: { en: "Natural gas, 5-day horizon: QLIKE by model (lower is better)", es: "Gas natural, horizonte de 5 días: QLIKE por modelo (menor es mejor)" }
   metric: QLIKE
@@ -65,19 +64,19 @@ leaderboard:
     es: "Conjunto de test: 498 días (ene-2024 a dic-2025). Estrellas: Diebold-Mariano frente a GARCH con correcciones de Newey-West y Harvey (*** p < 0,01, ns no significativo). Solo HAR y BiLSTM quedan dentro del Model Confidence Set."
 config:
   data:
-    assets: ["Brent (BZ=F, ICE)", "Henry Hub natural gas (NG=F, NYMEX)"]
-    period: "2018–2025, 2,013 daily returns"
-    target: Garman-Klass range estimator
+    assets: ["Brent (BZ=F, ICE)", { en: "Henry Hub natural gas (NG=F, NYMEX)", es: "gas natural Henry Hub (NG=F, NYMEX)" }]
+    period: { en: "2018–2025, 2,013 daily returns", es: "2018–2025, 2.013 retornos diarios" }
+    target: { en: Garman-Klass range estimator, es: estimador de rango de Garman-Klass }
   split:
     train: "2018–2022"
     validation: "2023"
     test: "2024–2025"
-    embargo: "5 sessions between blocks (López de Prado)"
+    embargo: { en: "5 sessions between blocks (López de Prado)", es: "5 sesiones entre bloques (López de Prado)" }
     refit_in_test: false
   models: ["GARCH(1,1)", "EGARCH(1,1)", "GJR-GARCH(1,1)", "HAR (Corsi)", "BiLSTM", "Temporal self-attention"]
-  training: "AdamW, cosine annealing, early stopping, 5 seeds"
+  training: { en: "AdamW, cosine annealing, early stopping, 5 seeds", es: "AdamW, cosine annealing, early stopping, 5 semillas" }
   evaluation: [QLIKE, Diebold-Mariano, Model Confidence Set, Kupiec, Christoffersen, Basel traffic light]
-  engineering: "63 pytest tests, GitHub Actions CI, Makefile, Conda environment"
+  engineering: { en: "63 pytest tests, GitHub Actions CI, Makefile, Conda environment", es: "63 tests de pytest, CI en GitHub Actions, Makefile, entorno Conda" }
 decisions:
   - title: { en: Add HAR to separate the two effects, es: Añadir el HAR para separar los dos efectos }
     body:

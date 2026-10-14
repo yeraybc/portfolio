@@ -353,7 +353,7 @@ function suggestEvidence(items: Item[]): Evidence[] {
   for (const i of items) {
     if (i.credit === 0) continue;
     i.evidence.forEach((ev, rank) => {
-      if (!ev.href.startsWith('/runs/') && ev.href !== '/deployments') return;
+      if (!ev.href.startsWith('/projects/') && ev.href !== '/deployments') return;
       const cur = byHref.get(ev.href) ?? { ev, w: 0 };
       cur.w += (i.credit * PRIORITY_WEIGHT[i.priority]) / (rank + 1);
       byHref.set(ev.href, cur);

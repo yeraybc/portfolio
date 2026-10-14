@@ -144,7 +144,7 @@ describe('match: data', () => {
     const pages = new Set(['/deployments', '/model-card', '/cv']);
     for (const s of [...skills, ...sectors]) {
       for (const ev of s.evidence ?? []) {
-        const ok = pages.has(ev.href) || (ev.href.startsWith('/runs/') && existsSync(`src/content/runs/${ev.href.slice(6)}.yaml`));
+        const ok = pages.has(ev.href) || (ev.href.startsWith('/projects/') && existsSync(`src/content/runs/${ev.href.slice(10)}.yaml`));
         expect(ok, `${s.id} → ${ev.href}`).toBe(true);
       }
     }

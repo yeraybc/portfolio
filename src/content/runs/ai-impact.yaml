@@ -3,7 +3,6 @@ status: archived
 lenses: [ds]
 lens_rank: { ds: 10, quant: 10, ai: 10, de: 11 }
 year: "2026"
-featured: false
 stack: [Python, scikit-learn]
 summary:
   en: Multiclass classification of AI replacement risk on a synthetic dataset. An early learning project.
@@ -16,9 +15,9 @@ finding:
   es: "Las variables personales no predecían el reemplazo; dos variables estructurales concentraban el 95 % de la señal. Datos sintéticos de Kaggle: la cifra no se extrapola a poblaciones reales."
 headline_text: { en: "Balanced accuracy 0.951", es: "Balanced accuracy 0,951" }
 config:
-  data: "2,000 employees, 17 variables (synthetic)"
+  data: { en: "2,000 employees, 17 variables (synthetic)", es: "2.000 empleados, 17 variables (sintéticos)" }
   models: [Logistic Regression, KNN, SVM, Random Forest, Gradient Boosting]
-  selected: "Logistic Regression (C = 0.01), chosen for parsimony"
+  selected: { en: "Logistic Regression (C = 0.01), chosen for parsimony", es: "Regresión logística (C = 0,01), elegida por parsimonia" }
 decisions: []
 artifacts:
   repo: https://github.com/yeraybc/ai-impact-analysis

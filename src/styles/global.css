@@ -169,6 +169,15 @@ pre,
   display: none;
 }
 
+/* Items listed only under some lenses, e.g. data-lens-top="ds quant". */
+:root:not([data-lens]) [data-lens-top]:not([data-lens-top~='ds']),
+:root[data-lens='ds'] [data-lens-top]:not([data-lens-top~='ds']),
+:root[data-lens='quant'] [data-lens-top]:not([data-lens-top~='quant']),
+:root[data-lens='ai'] [data-lens-top]:not([data-lens-top~='ai']),
+:root[data-lens='de'] [data-lens-top]:not([data-lens-top~='de']) {
+  display: none;
+}
+
 .skip-link {
   position: absolute;
   left: var(--s4);

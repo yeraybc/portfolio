@@ -51,7 +51,7 @@ const runTitle = (id: string) => {
               <p class="related">
                 <span class="muted">{t('nav.runs')}:</span>
                 {dep.data.related_runs.map((id) => (
-                  <a href={localePath(`/runs/${id}`, locale)} data-internal>
+                  <a href={localePath(`/projects/${id}`, locale)} data-internal>
                     {runTitle(id)}
                   </a>
                 ))}

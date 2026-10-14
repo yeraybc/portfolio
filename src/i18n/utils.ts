@@ -9,7 +9,7 @@ export function tr(value: L, locale: Locale): string {
   return value[locale] ?? value.en;
 }
 
-/** Path for a page in a locale. `path` is locale-free, e.g. "/runs/home-credit". */
+/** Path for a page in a locale. `path` is locale-free, e.g. "/projects/home-credit". */
 export function localePath(path: string, locale: Locale): string {
   const clean = path === '/' ? '' : path.replace(/\/$/, '');
   return locale === 'en' ? clean || '/' : `/es${clean}`;

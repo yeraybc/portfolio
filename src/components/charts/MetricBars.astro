@@ -16,7 +16,7 @@ interface Props {
     value: number;
     lower_is_better?: boolean;
     target?: number;
-    significance?: string;
+    significance?: string | L;
     decimals?: number;
     reported_pct?: number;
     approx_baseline?: boolean;
@@ -71,7 +71,7 @@ const rows = [
             {t('run.target')}: {fmtNum(m.target, locale)}.{' '}
           </span>
         )}
-        {m.significance}
+        {m.significance && (typeof m.significance === 'string' ? m.significance : tr(m.significance, locale))}
       </p>
     )
   }
