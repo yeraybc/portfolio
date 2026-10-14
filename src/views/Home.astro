@@ -89,6 +89,7 @@ const since = new Intl.DateTimeFormat(locale === 'es' ? 'es-ES' : 'en-GB', { day
         <a class="btn btn-primary" href={`mailto:${contact.email}`}>{t('cta.email')}</a>
         <a class="btn" href={localePath('/cv', locale)} data-internal>{t('cta.cv')}</a>
       </div>
+      <p class="match-cta"><a href={localePath('/match', locale)} data-internal>{t('home.match')}</a></p>
     </div>
   </section>
 </Base>
@@ -171,6 +172,12 @@ const since = new Intl.DateTimeFormat(locale === 'es' ? 'es-ES' : 'en-GB', { day
     align-content: start;
     gap: var(--s3);
     padding: var(--s5);
+  }
+  .match-cta {
+    margin-top: var(--s2);
+    padding-top: var(--s3);
+    border-top: 1px solid var(--rule);
+    font-size: var(--fs-sm);
   }
   .dep h2,
   .contact h2 {
